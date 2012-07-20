@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <syslog.h>
 
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -60,13 +61,13 @@ static int _do_ioctl(char *iface, int family, unsigned long int cmd, struct ifre
 	fd = socket(family, SOCK_DGRAM, 0);
 
 	if (fd < 0) {
-		ast_log(LOG_ERROR, "Could not open socket : %s", strerror(errno));
+		syslog(LOG_ERR, "Could not open socket : %s", strerror(errno));
 		return -1;
 	}
 
 	strcpy(ifr->ifr_name, iface);
 	if (ioctl(fd, cmd, ifr) < 0) {
-		ast_log(LOG_ERROR, "Could not do IOCTL : %s\n", strerror(errno));
+		syslog(LOG_ERR, "Could not do IOCTL : %s\n", strerror(errno));
 		ret = -1;
 	}
 
@@ -166,7 +167,7 @@ int libamg_get_default_gw_hwaddr(char *addr)
 	/* TODO STEP 3: Check ARP table for HW address */
 	/* XXX
 	if (libamg_get_peer_hwaddr(ipaddr, hwaddr) < 0) {
-		ast_log(LOG_ERROR, "Could not get default gateway's MAC address\n");
+		syslog(LOG_ERROR, "Could not get default gateway's MAC address\n");
 		return -1;
 	}
 	*/
