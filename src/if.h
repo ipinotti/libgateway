@@ -44,7 +44,7 @@ int libamg_get_interface_hwaddr(char *iface, char *addr);
  * @param addr
  * @return
  */
-int libamg_get_interface_ipv4_addr(char *iface, unsigned int *addr);
+int libamg_get_interface_ipv4_addr(char *iface,  struct in_addr *addr);
 
 /**
  * libamg_get_interface_ipv6_addr

@@ -188,14 +188,14 @@ int libamg_get_interface_hwaddr(char *iface, char *addr)
 	return 0;
 }
 
-int libamg_get_interface_ipv4_addr(char *iface, unsigned int *addr)
+int libamg_get_interface_ipv4_addr(char *iface, struct in_addr *addr)
 {
 	struct ifreq req;
 
 	if (_do_ioctl(iface, AF_INET, SIOCGIFADDR, &req) < 0)
 		return -1;
 
-	*addr = ((struct sockaddr_in *) &req.ifr_addr)->sin_addr.s_addr;
+	addr->s_addr = ((struct sockaddr_in *) &req.ifr_addr)->sin_addr.s_addr;
 
 	return 0;
 }
