@@ -14,25 +14,27 @@
  */
 #define FILE_SIP_CONF		"/etc/asterisk/sip.conf"
 
+#define PRODUCT_NAME	"Parks-AMG"
+
+#define NUM_SIP_ACCOUNTS	1
+
+
 #define SIP_GENERAL_CONTENT	"[general]\n" \
 				"context=from-sip\n" \
-				"dtmfmode=rfc2833\n" \
 				"disallow=all\n" \
-				"allow=alaw\n" \
 				"bindaddr=0.0.0.0\n"
 
 #define SIP_ACCOUNT_CONTENT	"\n[User1]\n" \
 				"#include sip_account_custom.conf\n" \
 				"type=friend\n"
 
-#define PRODUCT_NAME "Parks-AMG"
-
-
 /*
  * General Structures
  */
 struct libamg_sip_account {
+#ifdef NOT_SUPPORTED_AMG
 	int register_enable;
+#endif
 	char username[32];
 	char secret[32];
 	char host[32];
@@ -40,13 +42,15 @@ struct libamg_sip_account {
 	char callerid[32];
 	char fromuser[32];
 	char insecure[32];
+	char dtmfmode[32];
+	char allow[32];
 	int nat;
 	int qualify;
 };
 
 struct libamg_sip_config {
 	unsigned short bindport;
-	struct libamg_sip_account accounts[1];
+	struct libamg_sip_account accounts[NUM_SIP_ACCOUNTS];
 };
 
 

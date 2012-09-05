@@ -27,7 +27,7 @@
 struct libamg_sip_config *libamg_sip_parse_config(void)
 {
 	FILE *file;
-	char buffer[256];
+	char buffer[BUF_SIZE];
 	char *key;
 	char *value;
 	struct libamg_sip_config *conf;
@@ -50,7 +50,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 	}
 
 	/* Load SIP config and add CGI parameters */
-	while (fgets(buffer, 256, file)) {
+	while (fgets(buffer, BUF_SIZE, file)) {
 		/* Parse key and value */
 		key = buffer;
 		if (strchr(key, '=') == NULL)
@@ -63,8 +63,10 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		/* Parse parameters */
 		if (!strcmp(key, "bindport")) {
 			conf->bindport = atoi(value);
+#ifdef NOT_SUPPORTED_AMG
 		} else if (!strcmp(key, "register")) {
 			account->register_enable = 1;
+#endif
 		} else if (!strcmp(key, "host")) {
 			strncpy(account->host, value, 31);
 		} else if (!strcmp(key, "port")) {
@@ -79,6 +81,10 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 			strncpy(account->fromuser, value, 31);
 		} else if (!strcmp(key, "insecure")) {
 			strncpy(account->insecure, value, 31);
+		} else if (!strcmp(key, "dtmfmode")) {
+			strncpy(account->dtmfmode, value, 31);
+		} else if (!strcmp(key, "allow")) {
+			strncpy(account->allow, value, 31);
 		} else if (!strcmp(key, "nat")) {
 			account->nat = !strcmp(value, "yes");
 		} else if (!strcmp(key, "qualify")) {
@@ -112,6 +118,7 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	/* Save SIP bindport */
 	fprintf(file, "bindport=%hd\n", conf->bindport);
 
+#ifdef NOT_SUPPORTED_AMG
 	/* Save SIP account registration */
 	if (account->register_enable) {
 		/* register=>user:pass@sip_host:sip_port */
@@ -119,6 +126,7 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 				account->username, account->secret,
 				account->host, account->port);
 	}
+#endif
 
 	/* Save SIP account parameters */
 	fprintf(file, "%s", SIP_ACCOUNT_CONTENT);
@@ -133,6 +141,8 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	fprintf(file, "nat=%s\n", account->nat ? "yes" : "no");
 	fprintf(file, "qualify=%s\n", account->qualify ? "yes" : "no");
 	fprintf(file, "insecure=%s\n", account->insecure);
+	fprintf(file, "dtmfmode=%s\n", account->dtmfmode);
+	fprintf(file, "allow=%s\n", account->allow);
 
 	fclose(file);
 
