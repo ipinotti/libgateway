@@ -84,6 +84,7 @@ struct libamg_comcerto_config {
 	int vad_enable;
 	int vad_level;
 	int cng_enable;
+	int echocan_enable;
 	int ectail;
 	int e1_enable;
 	int e1_loopback_enable;

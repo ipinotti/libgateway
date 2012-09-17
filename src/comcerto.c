@@ -65,6 +65,8 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 			conf->vad_level = atoi(value);
 		} else if (!strcmp(key, "cng_enable")) {
 			conf->cng_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "echocan_enable")) {
+			conf->echocan_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "ectail")) {
 			conf->ectail = atoi(value);
 		} else if (!strcmp(key, "e1_enable")) {
@@ -113,6 +115,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "vad_enable=%s\n", conf->vad_enable ? "yes" : "no");
 	fprintf(file, "vad_level=%hd\n", conf->vad_level);
 	fprintf(file, "cng_enable=%s\n", conf->cng_enable ? "yes" : "no");
+	fprintf(file, "echocan_enable=%s\n", conf->echocan_enable ? "yes" : "no");
 	fprintf(file, "ectail=%hd\n", conf->ectail);
 	fprintf(file, "e1_enable=%s\n", conf->e1_enable ? "yes" : "no");
 	fprintf(file, "e1_loopback_enable=%s\n", conf->e1_loopback_enable ? "yes" : "no");
