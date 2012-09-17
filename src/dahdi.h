@@ -30,7 +30,6 @@
 #define CHAN_DAHDI_CONTENT	"[channels]\n" \
 				"language=br\n" \
 				"usecallerid=yes\n" \
-				"echocancel=yes\n" \
 				"echocancelwhenbridged=no\n" \
 				"buffers=8,half\n" \
 				"context=from-e1\n" \
@@ -73,6 +72,7 @@ struct libamg_dahdi_span {
 	int clock;	/* Clock source (0, 1, etc.) */
 	int crc;
 	int signalling;
+	int echocancel;
 	struct libamg_dahdi_isdn isdn;
 	struct libamg_dahdi_mfcr2 mfcr2;
 };

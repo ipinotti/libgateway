@@ -61,8 +61,26 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		strtok(value, " \t\n;#");
 
 		/* Parse parameters */
+			/* General confs */
 		if (!strcmp(key, "bindport")) {
 			conf->bindport = atoi(value);
+		} else if (!strcmp(key, "jbenable")) {
+			conf->jb_conf.jb_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "jbmaxsize")) {
+			conf->jb_conf.jb_maxsize = atoi(value);
+		} else if (!strcmp(key, "jbimpl")) {
+			conf->jb_conf.jb_impl = !strcmp(value, "adaptative");
+#ifdef NOT_YET_SUPPORTED
+		} else if (!strcmp(key, "jbmindelay")) {
+			conf->jb_conf.jb_mindelay = atoi(value);
+		} else if (!strcmp(key, "jbtypdelay")) {
+			conf->jb_conf.jb_typdelay = atoi(value);
+		} else if (!strcmp(key, "jbmaxdelay")) {
+			conf->jb_conf.jb_maxdelay = atoi(value);
+		} else if (!strcmp(key, "jbdelet_thrld")) {
+			conf->jb_conf.jb_delet_thrld = atoi(value);
+#endif
+			/* Account confs*/
 #ifdef NOT_SUPPORTED_AMG
 		} else if (!strcmp(key, "register")) {
 			account->register_enable = 1;
@@ -111,6 +129,17 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 
 	/* Save SIP general default parameters */
 	fprintf(file, "%s", SIP_GENERAL_CONTENT);
+
+	/* Jitter Buffer Confs (Same as Comcerto confs) */
+	fprintf(file, "jbenable=%s\n", conf->jb_conf.jb_enable ? "yes" : "no"); /* ALWAYS ON FOR COMCERTO*/
+	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);
+	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptative" : "fixed");
+#ifdef NOT_YET_SUPPORTED
+	fprintf(file, "jbmindelay=%hd\n", conf->jb_conf.jb_mindelay);
+	fprintf(file, "jbtypdelay=%hd\n", conf->jb_conf.jb_typdelay);
+	fprintf(file, "jbmaxdelay=%hd\n", conf->jb_conf.jb_maxdelay);
+	fprintf(file, "jbdelet_thrld=%hd\n", conf->jb_conf.jb_delet_thrld);
+#endif
 
 	/* Save SIP Useragent */
 	fprintf(file, "useragent=" PRODUCT_NAME "\n");

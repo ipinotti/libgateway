@@ -9,6 +9,13 @@
 #ifndef SIP_H_
 #define SIP_H_
 
+
+/*
+ * General Includes
+ */
+#include "comcerto.h"
+
+
 /*
  * General Defines
  */
@@ -27,6 +34,7 @@
 #define SIP_ACCOUNT_CONTENT	"\n[User1]\n" \
 				"#include sip_account_custom.conf\n" \
 				"type=friend\n"
+
 
 /*
  * General Structures
@@ -50,6 +58,7 @@ struct libamg_sip_account {
 
 struct libamg_sip_config {
 	unsigned short bindport;
+	libamg_jb_config jb_conf;
 	struct libamg_sip_account accounts[NUM_SIP_ACCOUNTS];
 };
 

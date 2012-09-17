@@ -276,6 +276,12 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		} else if (!strcmp(key, "channel")) {
 			value = libamg_str_next_token(value, '>');
 			_parse_chan_dahdi_channel_line(conf, &span, value);
+		} else if (!strcmp(key, "echocancel")) {
+			if (!strcmp(value, "yes")) {
+				span.echocancel = 1;
+			} else {
+				span.echocancel = 0;
+			}
 		}
 	}
 
@@ -418,6 +424,10 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		/* Channels */
 		_gen_channels_line(buffer, i, conf->spans[i].channels);
 		fprintf(file, "channel=>%s\n", buffer);
+
+		/* Echo Cancel */
+		fprintf(file, "echocancel=%s\n",
+				span->echocancel ? "yes" : "no");
 	}
 
 	fclose(file);

@@ -19,43 +19,75 @@
 
 	Parâmetros:
 
+	[general] - HARDCODED_NEEDED_BY_ASTERISK
+
 	Voice Active Detection (VAD)
-	Ativado => vad_enable=yes
-	Desativado => vad_enable=no
+	Ativado			=>	vad_enable=yes
+	Desativado		=>	vad_enable=no
 
 	VAD Tune
-	Economia de banda máxima  => vad_level= max
-	5dB SNR                             => vad_level= 5
-	10dB SNR                            => vad_level= 10
-	20dB SNR                            => vad_level= 20
-	30dB SNR                            => vad_level= 30
+	Economia de banda máxima		=> vad_level= 0 (max)
+	5dB SNR							=> vad_level= 5
+	10dB SNR						=> vad_level= 10
+	20dB SNR						=> vad_level= 20
+	30dB SNR						=> vad_level= 30
 
 	Confort Noise Generation
-	Ativado      => cng=yes
-	Desativado   => cng=no
+	Ativado			=>	cng=yes
+	Desativado		=>	cng=no
 
 	Echo Cancelling Tail Size
-	de 8 a 128ms, em passos de 8ms         => ectail=128
+	de 8 a 128ms, em passos de 8ms		=>	ectail=128
+
+	E1 Enable
+	Ativado			=>	e1_enable=yes
+	Desativado		=>	e1_enable=no
 
 	E1 Loopback
-	Ativado       => loopback=yes
-	Desativado  => loopback=no
+	Ativado			=>	e1_loopback=yes
+	Desativado		=>	e1_loopback=no
+
+	Jitter Buffer Configs (Comcerto e Sip)
+	Ativado			=>	jb_enable=yes
+	Tamanho maximo do Jitter Buffer em "ms"		=>	jb_maxsize=num
+	Implementacao do Jitter buffer [fixed = 0 / adaptative = 1]		=>	jb_impl=fixed
+
+	Jitter Buffer (Comcerto)
+	Min Delay (0-200ms)				=>	jb_mindelay=num
+	Typical Delay (0-200ms)			=>	jb_typdelay=num
+	Max Delay (0-200ms)				=>	jb_maxdelay=num
+	Deletion Threshold (0-500ms)	=>	jb_delet_thrld=num
+
 */
 
 /*
  * General Defines
  */
-#define FILE_COMCERTO_CONF		"/etc/comcerto_tdm.conf"
+#define FILE_COMCERTO_CONF		"/etc/asterisk/comcerto_tdm.conf"
 
 /*
  * General Structures
  */
+
+/* Jitter Buffer Config used in SIP_conf and Comcerto_conf*/
+typedef struct libamg_jb_config {
+	int jb_enable;
+	int jb_maxsize;
+	int jb_impl;
+	int jb_mindelay;
+	int jb_typdelay;
+	int jb_maxdelay;
+	int jb_delet_thrld;
+} libamg_jb_config;
+
 struct libamg_comcerto_config {
 	int vad_enable;
 	int vad_level;
 	int cng_enable;
 	int ectail;
-	int loopback_enable;
+	int e1_enable;
+	int e1_loopback_enable;
+	libamg_jb_config jb_conf;
 };
 
 /*

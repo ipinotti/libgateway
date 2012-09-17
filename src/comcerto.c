@@ -20,6 +20,7 @@
 #include "log.h"
 #include "str.h"
 #include "comcerto.h"
+#include "sip.h"
 
 #define BUF_SIZE 128
 
@@ -66,8 +67,25 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 			conf->cng_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "ectail")) {
 			conf->ectail = atoi(value);
-		} else if (!strcmp(key, "loopback_enable")) {
-			conf->loopback_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "e1_enable")) {
+			conf->e1_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "e1_loopback_enable")) {
+			conf->e1_loopback_enable = !strcmp(value, "yes");
+		/* Jitter Buffer configs */
+		} else if (!strcmp(key, "jbenable")) {
+			conf->jb_conf.jb_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "jbmaxsize")) {
+			conf->jb_conf.jb_maxsize = atoi(value);
+		} else if (!strcmp(key, "jbimpl")) {
+			conf->jb_conf.jb_impl = !strcmp(value, "adaptative");
+		} else if (!strcmp(key, "jbmindelay")) {
+			conf->jb_conf.jb_mindelay = atoi(value);
+		} else if (!strcmp(key, "jbtypdelay")) {
+			conf->jb_conf.jb_typdelay = atoi(value);
+		} else if (!strcmp(key, "jbmaxdelay")) {
+			conf->jb_conf.jb_maxdelay = atoi(value);
+		} else if (!strcmp(key, "jbdelet_thrld")) {
+			conf->jb_conf.jb_delet_thrld = atoi(value);
 		}
 	}
 
@@ -79,6 +97,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 {
 	FILE *file;
+	struct libamg_sip_config * sip_conf;
 
 	/* Open Comcerto config file */
 	file = fopen(FILE_COMCERTO_CONF, "w");
@@ -87,15 +106,38 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 		return -1;
 	}
 
-	/* Save Comcerto conf. parameters */
+	/* Tag needed by Asterisk */
+	fprintf(file, "[general]\n\n");
 
+	/* Save Comcerto conf. parameters */
 	fprintf(file, "vad_enable=%s\n", conf->vad_enable ? "yes" : "no");
 	fprintf(file, "vad_level=%hd\n", conf->vad_level);
 	fprintf(file, "cng_enable=%s\n", conf->cng_enable ? "yes" : "no");
 	fprintf(file, "ectail=%hd\n", conf->ectail);
-	fprintf(file, "loopback_enable=%s\n", conf->loopback_enable ? "yes" : "no");
+	fprintf(file, "e1_enable=%s\n", conf->e1_enable ? "yes" : "no");
+	fprintf(file, "e1_loopback_enable=%s\n", conf->e1_loopback_enable ? "yes" : "no");
+	/* Jitter Buffer configs */
+	fprintf(file, "jbenable=%s\n", conf->jb_conf.jb_enable ? "yes" : "no"); /* ALWAYS ON FOR COMCERTO*/
+	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);
+	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptative" : "fixed");
+	fprintf(file, "jbmindelay=%hd\n", conf->jb_conf.jb_mindelay);
+	fprintf(file, "jbtypdelay=%hd\n", conf->jb_conf.jb_typdelay);
+	fprintf(file, "jbmaxdelay=%hd\n", conf->jb_conf.jb_maxdelay);
+	fprintf(file, "jbdelet_thrld=%hd\n", conf->jb_conf.jb_delet_thrld);
 
 	fclose(file);
+
+	/* Saves Jitter Buffer configs inside SIP_conf file*/
+
+	/* Retrieve SIP configs*/
+	sip_conf = libamg_sip_parse_config();
+
+	/* Add Jitter buffer confs in SIP conf */
+	sip_conf->jb_conf = conf->jb_conf;
+
+	/* Save new SIP confs*/
+	if (libamg_sip_save_config(sip_conf) < 0)
+		return -1;
 
 	return 0;
 }
