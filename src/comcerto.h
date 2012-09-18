@@ -86,6 +86,8 @@ struct libamg_comcerto_config {
 	int cng_enable;
 	int echocan_enable;
 	int ectail;
+	int txgain;
+	int rxgain;
 	int e1_enable;
 	int e1_loopback_enable;
 	libamg_jb_config jb_conf;

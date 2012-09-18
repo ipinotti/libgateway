@@ -67,6 +67,10 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 			conf->cng_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "echocan_enable")) {
 			conf->echocan_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "txgain")) {
+			conf->txgain = atoi(value);
+		} else if (!strcmp(key, "rxgain")) {
+			conf->rxgain = atoi(value);
 		} else if (!strcmp(key, "ectail")) {
 			conf->ectail = atoi(value);
 		} else if (!strcmp(key, "e1_enable")) {
@@ -127,6 +131,9 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "jbtypdelay=%hd\n", conf->jb_conf.jb_typdelay);
 	fprintf(file, "jbmaxdelay=%hd\n", conf->jb_conf.jb_maxdelay);
 	fprintf(file, "jbdelet_thrld=%hd\n", conf->jb_conf.jb_delet_thrld);
+	/* Tx/Rx Gain */
+	fprintf(file, "txgain=%hd\n",conf->txgain);
+	fprintf(file, "rxgain=%hd\n",conf->rxgain);
 
 	fclose(file);
 
