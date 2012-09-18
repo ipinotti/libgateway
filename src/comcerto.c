@@ -24,6 +24,11 @@
 
 #define BUF_SIZE 128
 
+int libamg_comcerto_rtp_reload(void)
+{
+	return system("asterisk -rx \"module reload librtp-comcerto\"");
+}
+
 struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 {
 	FILE *file;

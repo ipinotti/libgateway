@@ -98,6 +98,16 @@ struct libamg_comcerto_config {
  */
 
 /**
+ * libamg_comcerto_rtp_reload
+ *
+ * Reload the RTP module using the new configuration
+ * from the comcerto configuration file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_comcerto_rtp_reload(void);
+
+/**
  * libamg_comcerto_parse_config
  *
  * Get configuration from Comcerto config file.
