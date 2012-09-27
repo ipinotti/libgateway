@@ -24,6 +24,11 @@
 
 #define BUF_SIZE 128
 
+int libamg_comcerto_rtp_reload(void)
+{
+	return system("asterisk -rx \"module reload librtp-comcerto\"");
+}
+
 struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 {
 	FILE *file;
@@ -65,6 +70,12 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 			conf->vad_level = atoi(value);
 		} else if (!strcmp(key, "cng_enable")) {
 			conf->cng_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "echocan_enable")) {
+			conf->echocan_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "txgain")) {
+			conf->txgain = atoi(value);
+		} else if (!strcmp(key, "rxgain")) {
+			conf->rxgain = atoi(value);
 		} else if (!strcmp(key, "ectail")) {
 			conf->ectail = atoi(value);
 		} else if (!strcmp(key, "e1_enable")) {
@@ -113,6 +124,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "vad_enable=%s\n", conf->vad_enable ? "yes" : "no");
 	fprintf(file, "vad_level=%hd\n", conf->vad_level);
 	fprintf(file, "cng_enable=%s\n", conf->cng_enable ? "yes" : "no");
+	fprintf(file, "echocan_enable=%s\n", conf->echocan_enable ? "yes" : "no");
 	fprintf(file, "ectail=%hd\n", conf->ectail);
 	fprintf(file, "e1_enable=%s\n", conf->e1_enable ? "yes" : "no");
 	fprintf(file, "e1_loopback_enable=%s\n", conf->e1_loopback_enable ? "yes" : "no");
@@ -124,6 +136,9 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "jbtypdelay=%hd\n", conf->jb_conf.jb_typdelay);
 	fprintf(file, "jbmaxdelay=%hd\n", conf->jb_conf.jb_maxdelay);
 	fprintf(file, "jbdelet_thrld=%hd\n", conf->jb_conf.jb_delet_thrld);
+	/* Tx/Rx Gain */
+	fprintf(file, "txgain=%hd\n",conf->txgain);
+	fprintf(file, "rxgain=%hd\n",conf->rxgain);
 
 	fclose(file);
 

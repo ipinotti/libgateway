@@ -84,7 +84,10 @@ struct libamg_comcerto_config {
 	int vad_enable;
 	int vad_level;
 	int cng_enable;
+	int echocan_enable;
 	int ectail;
+	int txgain;
+	int rxgain;
 	int e1_enable;
 	int e1_loopback_enable;
 	libamg_jb_config jb_conf;
@@ -93,6 +96,16 @@ struct libamg_comcerto_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_comcerto_rtp_reload
+ *
+ * Reload the RTP module using the new configuration
+ * from the comcerto configuration file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_comcerto_rtp_reload(void);
 
 /**
  * libamg_comcerto_parse_config
