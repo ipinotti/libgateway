@@ -48,7 +48,7 @@
 	Desativado		=>	e1_loopback=no
 
 	Jitter Buffer Configs (Comcerto e Sip)
-	Ativado			=>	jb_enable=yes
+	Ativado			=>	jb_enable=yes (ALWAYS ON FOR COMCERTO)
 	Tamanho maximo do Jitter Buffer em "ms"		=>	jb_maxsize=num
 	Implementacao do Jitter buffer [fixed = 0 / adaptative = 1]		=>	jb_impl=fixed
 

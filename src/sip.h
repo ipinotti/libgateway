@@ -35,25 +35,49 @@
 				"#include sip_account_custom.conf\n" \
 				"type=friend\n"
 
+/* Codecs */
+#define G711_A "alaw"
+#define G711_U "ulaw"
+#define G723_1 "g723"
+#define G726_16Kbps "g726-16"
+#define G726_24Kbps "g726-24"
+#define G726_32Kbps "g726-32"
+#define G726_40Kbps "g726-40"
+#define G729 "g729"
+#define GSM "gsm"
+
 
 /*
  * General Structures
  */
+
+typedef struct libamg_sip_codecs {
+	unsigned int gsm:1;
+	unsigned int g729:1;
+	unsigned int g726_40kbps:1;
+	unsigned int g726_32kbps:1;
+	unsigned int g726_24kbps:1;
+	unsigned int g726_16kbps:1;
+	unsigned int g723_1:1;
+	unsigned int g711_U:1;
+	unsigned int g711_A:1;
+}libamg_sip_codecs;
+
 struct libamg_sip_account {
 #ifdef NOT_SUPPORTED_AMG
 	int register_enable;
+	int nat;
+	int qualify;
+	char callerid[32];
+	char fromuser[32];
+	char insecure[32];
 #endif
 	char username[32];
 	char secret[32];
 	char host[32];
 	unsigned short port;
-	char callerid[32];
-	char fromuser[32];
-	char insecure[32];
 	char dtmfmode[32];
-	char allow[32];
-	int nat;
-	int qualify;
+	libamg_sip_codecs allow;
 };
 
 struct libamg_sip_config {
