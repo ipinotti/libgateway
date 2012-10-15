@@ -12,6 +12,12 @@ AM_PROG_AS
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# Checks for libraries.
+AC_CHECK_LIB(pthread, pthread_join,,AC_MSG_ERROR([unable to find the pthread_join() function]))
+AC_CHECK_LIB(gtlcsme, TETH_Init,,AC_MSG_ERROR([unable to find the TETH_Init() function]), -lgtlcommon)
+AC_CHECK_LIB(gtlcommon, GTL_Open,,AC_MSG_ERROR([unable to find the GTL_Open() function]), -lgtlcsme)
+AC_CHECK_LIB(vapi, VAPI_Init,,AC_MSG_ERROR([unable to find the VAPI_Init() function]))
+
 # Checks for header files.
 AC_CHECK_HEADERS([stdio.h stdlib.h])
 
