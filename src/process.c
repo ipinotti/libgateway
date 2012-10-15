@@ -434,7 +434,7 @@ int libamg_process_prog_capture(char *buffer, int len, char *path, ...)
 		dup(fd[1]);
 
 		ret = execv(path, argv);
-		syslog(LOG_ERR, "could not exec %s %s", path, argv);
+		syslog(LOG_ERR, "could not exec %s", path);
 		return -1;
 		break;
 	case -1:
