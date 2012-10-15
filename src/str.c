@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
 #include "str.h"
 
 char *libamg_str_skip_spaces(const char *str)
