@@ -117,11 +117,6 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 
 /*********************************************************************************/
 
-static int _write_vopena(int conn_id, struct _VOIP_VOPENA *opt)
-{
-	return _write_opts(conn_id, FC_VOIP_VOPENA, (void *)opt);
-}
-
 static int _write_vceopt(int conn_id, struct _VOIP_VCEOPT *opt)
 {
 	return _write_opts(conn_id, FC_VOIP_VCEOPT, (void *)opt);
@@ -235,7 +230,7 @@ int libamg_dsp_set_echocan(int conn_id, SVoIPChnlParams *parms, int enable, int 
 	return _write_echocan_opt(conn_id, opt);
 }
 
-int libamg_dsp_set_dtmf_mode(int conn_id, SVoIPChnlParams *parms, enum ast_rtp_dtmf_mode dtmf_mode)
+int libamg_dsp_set_dtmf_mode(int conn_id, SVoIPChnlParams *parms, enum _dtmf_mode dtmf_mode)
 {
 	struct _VOIP_DTMFOPT *opt = &parms->stDtmfOpt;
 
@@ -243,12 +238,12 @@ int libamg_dsp_set_dtmf_mode(int conn_id, SVoIPChnlParams *parms, enum ast_rtp_d
 	opt->param_4.bits.dtmf_rtp = VOIP_DTMFOPT_DTMF_RTP_DISABLE;
 
 	switch (dtmf_mode) {
-	case AST_RTP_DTMF_MODE_NONE:
+	case DTMF_MODE_NONE:
 		break;
-	case AST_RTP_DTMF_MODE_INBAND:
+	case DTMF_MODE_INBAND:
 		opt->param_4.bits.dtmf_voice = VOIP_DTMFOPT_DTMF_VOICE_ENABLE;
 		break;
-	case AST_RTP_DTMF_MODE_RFC2833:
+	case DTMF_MODE_RFC2833:
 	default:
 		opt->param_4.bits.dtmf_rtp = VOIP_DTMFOPT_DTMF_RTP_ENABLE;
 		break;
@@ -275,6 +270,9 @@ int libamg_dsp_set_inband_signaling(int conn_id, SVoIPChnlParams *parms,
 	struct _VOIP_SIGDET *sigdet_opt = &parms->stSigdet;
 	EConnOpMode conn_state;
 
+	amg_dbg("Comcerto DSP => Channel %d : %sabling MFC R2 tone detection\n",
+			conn_id, mode == INBAND_SIG_OFF ? "Dis" : "En");
+
 	sigdet_opt->param_4.bits.mode = mode;
 
 	/*
@@ -289,14 +287,18 @@ int libamg_dsp_set_inband_signaling(int conn_id, SVoIPChnlParams *parms,
 	libamg_dsp_set_mf_r2_timings(conn_id);
 
 	if (mode == INBAND_SIG_OFF)
-		conn_state = eInbandToneDetActive;
-	else
 		conn_state = eTdmActive;
+	else
+		conn_state = eInbandToneDetActive;
 
-	if (VAPI_SetConnectionState(conn_id, eInbandToneDetActive, NULL) < 0) {
-		amg_err("Conn %d: Error setting connection state to eInbandToneDetActive\n", conn_id);
+	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
+		amg_err("Conn %d: Error setting connection state to %s mode\n",
+				conn_id, conn_state == eInbandToneDetActive ?
+						"Inband detection" : "TDM active");
 		return -1;
 	}
+
+	amg_dbg("Comcerto DSP => Channel %d : Exiting %s\n", conn_id, __FUNCTION__);
 
 	return 0;
 }
@@ -313,4 +315,155 @@ int libamg_dsp_set_mf_r2_timings(int conn_id)
 	opt.maximum_dropout_time = 30;
 
 	return _write_mfdpar(conn_id, &opt);
+}
+
+/**
+ * Tone Event structure to be used for queuing/dequeing tones
+ */
+struct tone_event_t {
+	int conn_id;
+	int tone;
+	struct tone_event_t *next;
+};
+
+/* Base of tone list */
+pthread_mutex_t tone_event_mutex = PTHREAD_MUTEX_INITIALIZER;
+static struct tone_event_t base_tone_event = {
+		.conn_id = -1,
+		.tone = -1,
+		.next = NULL,
+};
+
+int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone)
+{
+	struct tone_event_t *t, *tmp;
+
+	t = malloc(sizeof(struct tone_event_t));
+	if (t == NULL) {
+		amg_err("No memory to alloc tone event\n");
+		return -1;
+	}
+
+	t->conn_id = tone->ConId;
+	t->tone = tone->usDetectedTone;
+	t->next = NULL;
+
+	pthread_mutex_lock(&tone_event_mutex);
+
+	/* Go to end of list */
+	for (tmp = &base_tone_event; tmp->next != NULL; tmp = tmp->next);
+
+#ifdef QUEUE_DEBUG
+	amg_log("QUEUE: base = %p\n", &base_tone_event);
+	amg_log("QUEUE: tmp = %p\n", tmp);
+	amg_log("QUEUE: t = %p\n", t);
+#endif
+
+	/* Insert tone */
+	tmp->next = t;
+
+	pthread_mutex_unlock(&tone_event_mutex);
+
+	return 0;
+}
+
+int libamg_dsp_dequeue_tone_event(int conn_id)
+{
+	struct tone_event_t *t, *p;
+	int tone = -1;
+
+	pthread_mutex_lock(&tone_event_mutex);
+
+
+
+	/* Travel through list */
+	for (t = p = &base_tone_event; t != NULL; p = t, t = t->next) {
+
+		/* Get the correct connection ID */
+		if (conn_id != t->conn_id)
+			continue;
+
+		tone = t->tone; /* Store tone */
+
+		p->next = t->next; /* Update queue */
+
+		free(t); /* Free unqueued tone */
+	}
+
+	pthread_mutex_unlock(&tone_event_mutex);
+
+#ifdef QUEUE_DEBUG
+	if (tone != -1)
+		amg_log("Dequeing tone %d for connection %d\n", tone, conn_id);
+#endif
+
+	return tone;
+}
+
+static const char r2_mf_tone_codes[] = "1234567890BCDEF"; /* Borrowed from OpenR2 */
+char libamg_dsp_mfcr2_tone_int_to_char(int tone)
+{
+	if (tone == 0xff)
+		return 0;
+
+	return r2_mf_tone_codes[tone-1];
+}
+
+
+struct tone_map_t {
+	char tone;
+	int id;
+};
+
+int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone)
+{
+	int i;
+	int tone_id = -1;
+
+	struct tone_map_t fmap[] = {
+			{ '1', eMFCR2_FTONE_1 }, { '2', eMFCR2_FTONE_2 },
+			{ '3', eMFCR2_FTONE_3 }, { '4', eMFCR2_FTONE_4 },
+			{ '5', eMFCR2_FTONE_5 }, { '6', eMFCR2_FTONE_6 },
+			{ '7', eMFCR2_FTONE_7 }, { '8', eMFCR2_FTONE_8 },
+			{ '9', eMFCR2_FTONE_9 }, { '0', eMFCR2_FTONE_0 },
+			{ 'B', eMFCR2_FTONE_B }, { 'C', eMFCR2_FTONE_C },
+			{ 'D', eMFCR2_FTONE_D }, { 'E', eMFCR2_FTONE_E },
+			{ 'F', eMFCR2_FTONE_F }, { '\0', 0 },
+	};
+
+	struct tone_map_t bmap[] = {
+			{ '1', eMFCR2_BTONE_1 }, { '2',	eMFCR2_BTONE_2 },
+			{ '3', eMFCR2_BTONE_3 }, { '4', eMFCR2_BTONE_4 },
+			{ '5', eMFCR2_BTONE_5 }, { '6', eMFCR2_BTONE_6 },
+			{ '7', eMFCR2_BTONE_7 }, { '8', eMFCR2_BTONE_8 },
+			{ '9', eMFCR2_BTONE_9 }, { '0', eMFCR2_BTONE_0 },
+			{ 'B', eMFCR2_BTONE_B }, { 'C', eMFCR2_BTONE_C },
+			{ 'D', eMFCR2_BTONE_D }, { 'E', eMFCR2_BTONE_E },
+			{ 'F', eMFCR2_BTONE_F }, { '\0', 0 },
+	};
+
+	struct tone_map_t *map = fwd ? fmap : bmap;
+
+	for (i = 0; map[i].tone != '\0'; i++) {
+		if (tone == map[i].tone) {
+				tone_id =  map[i].id;
+		}
+	}
+
+	if (tone_id < 0) {
+		amg_err("(Channel %d) MFC/R2: Could not generate tone %c\n", conn_id, tone);
+		return -1;
+	}
+
+	amg_dbg("(Channel %d) MFC/R2 %s : Playing tone %c\n",
+			conn_id, fwd ? "Forward" : "Backward", tone);
+
+	return VAPI_PlayTone(conn_id, tone_id, eDirToTDM, NULL, 0, NULL);
+}
+
+int libamg_dsp_mfcr2_stop_tone(int conn_id)
+{
+	amg_dbg("(Channel %d) MFC/R2 : Stoping tone\n", conn_id);
+
+	return VAPI_StopTone(conn_id, 0, eDirToTDM, NULL);
 }

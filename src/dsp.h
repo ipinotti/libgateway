@@ -12,11 +12,6 @@
 #include <vapi/ut.h>
 #include <vapi/gtl.h>
 
-#include <asterisk.h>
-#include <asterisk/module.h>
-#include <asterisk/logger.h>
-#include <asterisk/rtp_engine.h>
-
 #include <syslog.h>
 
 #define amg_err(x,...) syslog(LOG_ERR, x, ##__VA_ARGS__)
@@ -86,7 +81,13 @@ int libamg_dsp_set_echocan(int conn_id, SVoIPChnlParams *parms, int enable, int 
  * @param dtmf_mode: DTMF mode (ast enum)
  * @return 0 if success, negative if error
  */
-int libamg_dsp_set_dtmf_mode(int conn_id, SVoIPChnlParams *parms, enum ast_rtp_dtmf_mode dtmf_mode);
+
+enum _dtmf_mode {
+	DTMF_MODE_NONE = 0,
+	DTMF_MODE_RFC2833,
+	DTMF_MODE_INBAND,
+};
+int libamg_dsp_set_dtmf_mode(int conn_id, SVoIPChnlParams *parms, enum _dtmf_mode dtmf_mode);
 
 
 struct jb_params {
@@ -133,5 +134,48 @@ int libamg_dsp_set_inband_signaling(int conn_id, SVoIPChnlParams *parms,
  */
 int libamg_dsp_set_mf_r2_timings(int conn_id);
 
+/**
+ * Dequeue any existing tone event for a certain connection
+ *
+ * @param The Connection ID
+ * @return The tone if any, negative if none
+ *
+ */
+int libamg_dsp_dequeue_tone_event(int conn_id);
+
+/**
+ * Queue tone event for a certain connection
+ *
+ * @param Pointer to SToneDetectEventParams data
+ * @return 0 if success, -1 if error
+ *
+ */
+int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone);
+
+/**
+ *	Translate tones from binary (Comcerto) to ASCII (OpenR2)
+ *
+ *  @param Tone value in binary
+ *  @return Tone value in ASCII
+ */
+char libamg_dsp_mfcr2_tone_int_to_char(int tone);
+
+/**
+ * Start playing a MFC/R2 tone in channel
+ *
+ * @param conn_id : Which channel to act upon
+ * @param fwd : 1 if forward tone , 0 if backward tone
+ * @param tone : Tone value in ASCII
+ * @return 0 if success, -1 if error
+ */
+int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone);
+
+/**
+ * Stop playing MFC/R2 tone in channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @return 0 if success, -1 if error
+ */
+int libamg_dsp_mfcr2_stop_tone(int conn_id);
 
 #endif /* DSP_H_ */
