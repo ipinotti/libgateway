@@ -1,8 +1,28 @@
 /*
- * dsp.c
+ * Copyright (c) 2012 PD3 Tecnologia
  *
- *  Created on: Oct 15, 2012
- *      Author: tgrande
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * File name: dsp.c
+ * Created on: Oct 15, 2012
+ * Author: Thomas Del Grande <tgrande@pd3.com.br>
+ *
+ * Functions to configure the DSP core in the Comcerto device
+ * using the VAPI library
+ *
+ * Note: Must be used by one process only, e.g. Asterisk
  */
 
 #include <stdio.h>
@@ -30,7 +50,8 @@ static int __write_to_device(U16 conn_id, SMsg *data)
 	/* Disable connection at first */
 	status = VAPI_SetConnectionState(conn_id, eInactive, NULL);
 	if (status != SUCCESS) {
-		amg_err("%d : Could not deactivate connection %d\n", status, conn_id);
+		amg_err("(Channel %d) : Could not deactivate connection. Error %d\n",
+				conn_id, status);
 		return -1;
 	}
 
@@ -38,14 +59,16 @@ static int __write_to_device(U16 conn_id, SMsg *data)
 	status = VAPI_SendConnectionMessage(conn_id, data, NULL,
 			device_response, &response_size);
 	if (status != SUCCESS) {
-		amg_err("%d : Could not send message to connection %d\n", status, conn_id);
+		amg_err("(Channel %d) : Could not send message to DSP. Error %d\n",
+				conn_id, status);
 		return -1;
 	}
 
 	/* Reactivate */
 	status = VAPI_SetConnectionState(conn_id, eTdmActive, NULL);
 	if (status != SUCCESS) {
-		amg_err("%d : Could not activate connection %d\n", status, conn_id);
+		amg_err("(Channel %d) : Could not activate connection. Error %d\n",
+				conn_id, status);
 		return -1;
 	}
 
@@ -219,7 +242,7 @@ int libamg_dsp_set_echocan(int conn_id, SVoIPChnlParams *parms, int enable, int 
 {
 	struct _VOIP_ECHOCAN *opt = &parms->stEchoCan;
 
-	amg_dbg("%sabling echo cancelling in connection %d\n",
+	amg_dbg("%sabling echo cancelling\n",
 	        enable ? "En" : "Dis", conn_id);
 
 	if (enable)
@@ -264,13 +287,27 @@ int libamg_dsp_set_jitter_buffer(int conn_id, SVoIPChnlParams *parms, struct jb_
 	return _write_jb_opt(conn_id, opt);
 }
 
+int libamg_dsp_set_mf_r2_timings(int conn_id)
+{
+	struct _VOIP_MFDPAR opt;
+
+	opt.mf_selector = 1; /* R2 */
+
+	/* FIXME Review these values */
+	opt.minimum_off_time = 100;
+	opt.minimum_on_time = 100;
+	opt.maximum_dropout_time = 30;
+
+	return _write_mfdpar(conn_id, &opt);
+}
+
 int libamg_dsp_set_inband_signaling(int conn_id, SVoIPChnlParams *parms,
 		enum inband_signaling_t mode)
 {
 	struct _VOIP_SIGDET *sigdet_opt = &parms->stSigdet;
 	EConnOpMode conn_state;
 
-	amg_dbg("Comcerto DSP => Channel %d : %sabling MFC R2 tone detection\n",
+	amg_dbg("(Channel %d): %sabling MFC R2 tone detection\n",
 			conn_id, mode == INBAND_SIG_OFF ? "Dis" : "En");
 
 	sigdet_opt->param_4.bits.mode = mode;
@@ -292,29 +329,13 @@ int libamg_dsp_set_inband_signaling(int conn_id, SVoIPChnlParams *parms,
 		conn_state = eInbandToneDetActive;
 
 	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
-		amg_err("Conn %d: Error setting connection state to %s mode\n",
+		amg_err("(Channel %d): Error setting connection state to %s mode\n",
 				conn_id, conn_state == eInbandToneDetActive ?
 						"Inband detection" : "TDM active");
 		return -1;
 	}
 
-	amg_dbg("Comcerto DSP => Channel %d : Exiting %s\n", conn_id, __FUNCTION__);
-
 	return 0;
-}
-
-int libamg_dsp_set_mf_r2_timings(int conn_id)
-{
-	struct _VOIP_MFDPAR opt;
-
-	opt.mf_selector = 1; /* R2 */
-
-	/* FIXME Review these values */
-	opt.minimum_off_time = 100;
-	opt.minimum_on_time = 100;
-	opt.maximum_dropout_time = 30;
-
-	return _write_mfdpar(conn_id, &opt);
 }
 
 /**
@@ -374,8 +395,6 @@ int libamg_dsp_dequeue_tone_event(int conn_id)
 
 	pthread_mutex_lock(&tone_event_mutex);
 
-
-
 	/* Travel through list */
 	for (t = p = &base_tone_event; t != NULL; p = t, t = t->next) {
 
@@ -415,6 +434,7 @@ struct tone_map_t {
 	int id;
 };
 
+#ifdef COMCERTO_MFCR2_TONES
 int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone)
 {
 	int i;
@@ -455,7 +475,7 @@ int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone)
 		return -1;
 	}
 
-	amg_dbg("(Channel %d) MFC/R2 %s : Playing tone %c\n",
+	amg_dbg("(Channel %d) : Playing MFC/R2 %s tone %c\n",
 			conn_id, fwd ? "Forward" : "Backward", tone);
 
 	return VAPI_PlayTone(conn_id, tone_id, eDirToTDM, NULL, 0, NULL);
@@ -463,7 +483,8 @@ int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone)
 
 int libamg_dsp_mfcr2_stop_tone(int conn_id)
 {
-	amg_dbg("(Channel %d) MFC/R2 : Stoping tone\n", conn_id);
+	amg_dbg("(Channel %d) : Stoping MFC/R2 tone\n", conn_id);
 
 	return VAPI_StopTone(conn_id, 0, eDirToTDM, NULL);
 }
+#endif

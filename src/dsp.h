@@ -1,8 +1,25 @@
 /*
- * dsp.h
+ * Copyright (c) 2012 PD3 Tecnologia
  *
- *  Created on: Oct 15, 2012
- *      Author: tgrande
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * File name: dsp.h
+ * Created on: Oct 15, 2012
+ * Author: Thomas Del Grande <tgrande@pd3.com.br>
+ *
+ * Definitions for dsp.c
  */
 
 #ifndef DSP_H_
@@ -17,6 +34,8 @@
 #define amg_err(x,...) syslog(LOG_ERR, x, ##__VA_ARGS__)
 #define amg_log(x,...) syslog(LOG_INFO, x, ##__VA_ARGS__)
 #define amg_dbg(x,...) syslog(LOG_DEBUG, x, ##__VA_ARGS__)
+
+#define COMCERTO_MFCR2_TONES
 
 /**
  * Enable/Disable Voice Active Detection on connection
@@ -152,6 +171,7 @@ int libamg_dsp_dequeue_tone_event(int conn_id);
  */
 int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone);
 
+#ifdef COMCERTO_MFCR2_TONES
 /**
  *	Translate tones from binary (Comcerto) to ASCII (OpenR2)
  *
@@ -177,5 +197,6 @@ int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone);
  * @return 0 if success, -1 if error
  */
 int libamg_dsp_mfcr2_stop_tone(int conn_id);
+#endif /* COMCERTO_MFCR2_TONES */
 
 #endif /* DSP_H_ */
