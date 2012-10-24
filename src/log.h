@@ -33,6 +33,7 @@
  */
 #define DEBUG_LIBAMG_SYSLOG
 
+/* LibAMG debug */
 #if defined (DEBUG_LIBAMG_SYSLOG)
 #define libamg_log(x,...) \
 		syslog(LOG_INFO,  "%s : %d => "x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
@@ -45,5 +46,19 @@
 
 #define libamg_log_error(x,...) \
 	syslog(LOG_ERR, "%s:%d => "x , __FUNCTION__, __LINE__, ##__VA_ARGS__);
+
+/* AMG logging */
+#ifndef amg_err
+#define amg_err(x,...) syslog(LOG_ERR, x, ##__VA_ARGS__)
+#endif
+
+#ifndef amg_log
+#define amg_log(x,...) syslog(LOG_INFO, x, ##__VA_ARGS__)
+#endif
+
+#ifndef amg_dbg
+#define amg_dbg(x,...) syslog(LOG_DEBUG, x, ##__VA_ARGS__)
+#endif
+
 
 #endif /* LOG_H_ */
