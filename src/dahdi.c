@@ -536,6 +536,9 @@ int libamg_ais_daemon_apply_config(void)
 void libamg_dahdi_apply_config(void)
 {
 	/* Apply new configuration */
+
+	/* Hack for unloading Comcerto Module - Any ideas ? */
+	system("/sbin/asterisk -rx 'module unload libcomcerto-config.so'");
 	system("/sbin/asterisk -rx 'core stop now'");
 	system("/sbin/dahdi_cfg");
 	system("/sbin/asterisk");
