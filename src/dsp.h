@@ -35,8 +35,6 @@
 #define amg_log(x,...) syslog(LOG_INFO, x, ##__VA_ARGS__)
 #define amg_dbg(x,...) syslog(LOG_DEBUG, x, ##__VA_ARGS__)
 
-#define COMCERTO_MFCR2_TONES
-
 /**
  * Enable/Disable Voice Active Detection on connection
  *
@@ -140,13 +138,11 @@ enum inband_signaling_t {
  * Turn it off as soon as RTP traffic should be enabled.
  *
  * @param conn_id: Connection in question
- * @param parms: Pointer to channel parameters
  * @param mode: Signaling mode to be set
  * @return 0 if success, negative if error
  *
  */
-int libamg_dsp_set_inband_signaling(int conn_id, SVoIPChnlParams *parms,
-		enum inband_signaling_t mode);
+int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode);
 
 /**
  * Set MF R2 timing definitions
@@ -171,7 +167,6 @@ int libamg_dsp_dequeue_tone_event(int conn_id);
  */
 int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone);
 
-#ifdef COMCERTO_MFCR2_TONES
 /**
  *	Translate tones from binary (Comcerto) to ASCII (OpenR2)
  *
@@ -197,6 +192,12 @@ int libamg_dsp_mfcr2_start_tone(int conn_id, int fwd, char tone);
  * @return 0 if success, -1 if error
  */
 int libamg_dsp_mfcr2_stop_tone(int conn_id);
-#endif /* COMCERTO_MFCR2_TONES */
+
+/**
+ * Initialize locks (mutex) for DSP channels access
+ *
+ * @return Always 0
+ */
+int libamg_dsp_channel_lock_init(void);
 
 #endif /* DSP_H_ */
