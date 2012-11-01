@@ -60,6 +60,24 @@
 #define NUMSPANS	1
 #define BUF_SIZE	256
 
+/* Dahdi Switchtype References - related to spec -- parks_apvs_desc_v03.docx */
+#define Q_SIG_NAME				"qsig"		//Q.SIG
+#define Q_SIG_COD				40
+#define NATIONAL_ISDN_1_NAME	"ni1"		//Old National ISDN 1
+#define NATIONAL_ISDN_1_COD		20
+#define LUCENT_5ESS_NAME		"5ess"		//Lucent 5ESS
+#define LUCENT_5ESS_COD			10
+#define ATeT_4ESS_NAME			"4ess"		//AT&T 4ESS
+#define ATeT_4ESS_COD			8
+#define NORTEL_DMS100_NAME		"dms100"	//Nortel DMS100
+#define NORTEL_DMS100_COD		4
+#define NATIONAL_ISDN2_NAME		"national"	//National ISDN 2
+#define NATIONAL_ISDN2_COD		2
+#define EURO_ISDN_NAME			"euroisdn"	//EuroISDN (common in Europe)
+#define EURO_ISDN_COD			1
+
+
+
 
 /*
  * General Structures
@@ -111,6 +129,16 @@ struct libamg_dahdi_status {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_dahdi_get_switchtype_name
+ *
+ * Get Dahdi switch type name by addressed code in spec.
+ *
+ * @param switchtype_code
+ * @return string
+ */
+char * libamg_dahdi_get_switchtype_name (int switchtype_code);
 
 /**
  * libamg_dahdi_get_status
