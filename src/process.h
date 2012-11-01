@@ -25,6 +25,7 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
+/* Debug Function */
 //#define PROCESS_DEBUG
 #ifdef PROCESS_DEBUG
 #define process_dbg(x,...)         syslog(LOG_INFO, "%s : %d => "x , __FUNCTION__, __LINE__, ##__VA_ARGS__);
@@ -32,9 +33,11 @@
 #define process_dbg(x,...)
 #endif
 
-
+/* General Includes */
 #include <sys/param.h>
 
+
+/* General Defines*/
 #define INIT_MAGIC 0x03091969
 #define INIT_FIFO  "/dev/initctl"
 #define INIT_CMD_START         0
@@ -43,6 +46,19 @@
 #define INIT_CMD_POWERFAILNOW  3
 #define INIT_CMD_POWEROK       4
 
+#define ON		1
+#define OFF 	0
+#define ISDN	0
+#define MFCR2	1
+
+#define MAX_PROC_CMDLINE   256
+
+#define MAX_ARGS 10
+
+#define FILE_INITTAB "/etc/inittab"
+
+
+/* General Structs */
 struct init_request {
 	int magic; /* Magic number                 */
 	int cmd; /* What kind of request         */
@@ -58,11 +74,10 @@ struct init_request {
 	char reserved[128]; /* For future expansion.        */
 };
 
-#define MAX_PROC_CMDLINE   256
 
-#define MAX_ARGS 10
-
-#define FILE_INITTAB "/etc/inittab"
+/*
+ * Functions Declaration
+ */
 
 /**
  * Get process PID
