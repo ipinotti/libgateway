@@ -344,62 +344,9 @@ int libamg_dsp_set_jitter_buffer(int conn_id, SVoIPChnlParams *parms, struct jb_
 	return _write_jb_opt(conn_id, opt);
 }
 
-int libamg_dsp_set_mf_r2_timings(int conn_id)
-{
-	struct _VOIP_MFDPAR opt;
-
-	opt.mf_selector = 1; /* R2 */
-
-	/* FIXME Review these values */
-	opt.minimum_off_time = 200;
-	opt.minimum_on_time = 200;
-	opt.maximum_dropout_time = 60;
-
-	return _write_mfdpar(conn_id, &opt);
-}
-
-int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
-{
-	SVoIPChnlParams *parms;
-	struct _VOIP_SIGDET *sigdet_opt;
-	EConnOpMode conn_state;
-
-	amg_dbg("(Channel %d): %sabling MFC R2 tone detection\n",
-			conn_id, mode == INBAND_SIG_OFF ? "Dis" : "En");
-
-	if (VAPI_GetChnl_Info(conn_id, &parms) != SUCCESS)
-		return -1;
-
-	sigdet_opt = &parms->stSigdet;
-	sigdet_opt->param_4.bits.mode = mode;
-
-	libamg_dsp_set_mf_r2_timings(conn_id);
-
-	/*
-	 * Must send SIGDET and VOPENA to enable/disable
-	 * inband signaling detection
-	 */
-	if (_write_sigdet(conn_id, sigdet_opt) < 0) {
-		amg_err("Error sending SIGDET for connection %d\n", conn_id);
-		return -1;
-	}
-
-	if (mode == INBAND_SIG_OFF)
-		conn_state = eTdmActive;
-	else
-		conn_state = eInbandToneDetActive;
-
-	amg_dbg("Setting connection state to %s\n",
-			conn_state == eInbandToneDetActive ? "Inband detection" : "TDM active");
-	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
-		amg_err("(Channel %d): Error setting connection state to %s mode\n",
-				conn_id, conn_state == eInbandToneDetActive ?
-						"Inband detection" : "TDM active");
-		return -1;
-	}
-
-	return 0;
-}
+/***********************************************************/
+/******************* Tone queue ****************************/
+/***********************************************************/
 
 int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone)
 {
@@ -464,6 +411,77 @@ int libamg_dsp_dequeue_tone_event(int conn_id)
 #endif
 
 	return tone;
+}
+
+/*********************************************************/
+/********************** MF R2 ****************************/
+/*********************************************************/
+
+int libamg_dsp_set_mf_r2_timings(int conn_id)
+{
+	struct _VOIP_MFDPAR opt;
+
+	opt.mf_selector = 1; /* R2 */
+
+	/* FIXME Review these values */
+	opt.minimum_off_time = 200;
+	opt.minimum_on_time = 200;
+	opt.maximum_dropout_time = 60;
+
+	return _write_mfdpar(conn_id, &opt);
+}
+
+int libamg_dsp_get_inband_signaling(int conn_id)
+{
+	SVoIPChnlParams *parms;
+
+	if (VAPI_GetChnl_Info(conn_id, &parms) != SUCCESS)
+		return -1;
+
+	return parms->stSigdet.param_4.bits.mode;
+}
+
+int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
+{
+	SVoIPChnlParams *parms;
+	struct _VOIP_SIGDET *sigdet_opt;
+	EConnOpMode conn_state;
+
+	amg_dbg("(Channel %d): %sabling MFC R2 tone detection\n",
+			conn_id, mode == INBAND_SIG_OFF ? "Dis" : "En");
+
+	if (VAPI_GetChnl_Info(conn_id, &parms) != SUCCESS)
+		return -1;
+
+	sigdet_opt = &parms->stSigdet;
+	sigdet_opt->param_4.bits.mode = mode;
+
+	//libamg_dsp_set_mf_r2_timings(conn_id);
+
+	/*
+	 * Must send SIGDET and VOPENA to enable/disable
+	 * inband signaling detection
+	 */
+	if (_write_sigdet(conn_id, sigdet_opt) < 0) {
+		amg_err("Error sending SIGDET for connection %d\n", conn_id);
+		return -1;
+	}
+
+	if (mode == INBAND_SIG_OFF)
+		conn_state = eTdmActive;
+	else
+		conn_state = eInbandToneDetActive;
+
+	amg_dbg("Setting connection state to %s\n",
+			conn_state == eInbandToneDetActive ? "Inband detection" : "TDM active");
+	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
+		amg_err("(Channel %d): Error setting connection state to %s mode\n",
+				conn_id, conn_state == eInbandToneDetActive ?
+						"Inband detection" : "TDM active");
+		return -1;
+	}
+
+	return 0;
 }
 
 static const char r2_mf_tone_codes[] = "1234567890BCDEF"; /* Borrowed from OpenR2 */
@@ -536,6 +554,68 @@ int libamg_dsp_mfcr2_stop_tone(int conn_id)
 	int ret;
 
 	amg_dbg("(Channel %d) : Stopping MFC/R2 tone\n", conn_id);
+
+	__channel_lock(conn_id);
+	ret = VAPI_StopTone(conn_id, 0, eDirToTDM, NULL);
+	__channel_unlock(conn_id);
+
+	return ret;
+}
+
+/*********************************************************/
+/********************** DTMF *****************************/
+/*********************************************************/
+
+int libamg_dsp_dtmf_start_tone(int conn_id, char tone)
+{
+	int i, ret;
+	int tone_id = -1;
+
+	struct tone_map_t map[] = {
+			{ '1', eDTMFTONE_1 },
+			{ '2', eDTMFTONE_2 },
+			{ '3', eDTMFTONE_3 },
+			{ '4', eDTMFTONE_4 },
+			{ '5', eDTMFTONE_5 },
+			{ '6', eDTMFTONE_6 },
+			{ '7', eDTMFTONE_7 },
+			{ '8', eDTMFTONE_8 },
+			{ '9', eDTMFTONE_9 },
+			{ '0', eDTMFTONE_0 },
+			{ '*', eDTMFTONE_STAR },
+			{ '#', eDTMFTONE_HASH },
+			{ 'A', eDTMFTONE_A },
+			{ 'B', eDTMFTONE_B },
+			{ 'C', eDTMFTONE_C },
+			{ 'D', eDTMFTONE_D },
+			{ '\0', 0 },
+	};
+
+	amg_dbg("(Channel %d) : Playing DTMF tone %c\n", conn_id, tone);
+
+	for (i = 0; map[i].tone != '\0'; i++) {
+		if (tone == map[i].tone) {
+				tone_id =  map[i].id;
+		}
+	}
+
+	if (tone_id < 0) {
+		amg_err("(Channel %d) DTMF: Could not generate tone %c\n", conn_id, tone);
+		return -1;
+	}
+
+	__channel_lock(conn_id);
+	ret = VAPI_PlayTone(conn_id, tone_id, eDirToTDM, NULL, 0, NULL);
+	__channel_unlock(conn_id);
+
+	return ret;
+}
+
+int libamg_dsp_dtmf_stop_tone(int conn_id)
+{
+	int ret;
+
+	amg_dbg("(Channel %d) : Stopping DTMF tone\n", conn_id);
 
 	__channel_lock(conn_id);
 	ret = VAPI_StopTone(conn_id, 0, eDirToTDM, NULL);

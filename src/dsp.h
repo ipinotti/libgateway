@@ -132,6 +132,16 @@ enum inband_signaling_t {
 };
 
 /**
+ * Get current inband signaling mode
+ *
+ * Returns the inband signaling mode enabled: R2 backward, R2 forward or disabled (DTMF)
+ *
+ * @param conn_id: Connection in question
+ * @return signaling mode or negative if error
+ */
+int libamg_dsp_get_inband_signaling(int conn_id);
+
+/**
  * Set inband signaling mode
  *
  * This mode must be set if MF-R2 tones should be detected by the DSP.
@@ -140,7 +150,6 @@ enum inband_signaling_t {
  * @param conn_id: Connection in question
  * @param mode: Signaling mode to be set
  * @return 0 if success, negative if error
- *
  */
 int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode);
 
@@ -199,5 +208,8 @@ int libamg_dsp_mfcr2_stop_tone(int conn_id);
  * @return Always 0
  */
 int libamg_dsp_channel_lock_init(void);
+
+int libamg_dsp_dtmf_start_tone(int conn_id, char tone);
+int libamg_dsp_dtmf_stop_tone(int conn_id);
 
 #endif /* DSP_H_ */
