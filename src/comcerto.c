@@ -81,7 +81,9 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		strtok(value, " \t\n;#");
 
 		/* Parse parameters */
-		if (!strcmp(key, "vad_enable")) {
+		if (!strcmp(key, "ais_enable")) {
+			conf->ais_enable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "vad_enable")) {
 			conf->vad_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "vad_level")) {
 			conf->vad_level = atoi(value);
@@ -138,6 +140,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "[general]\n\n");
 
 	/* Save Comcerto conf. parameters */
+	fprintf(file, "ais_enable=%s\n", conf->ais_enable ? "yes" : "no");
 	fprintf(file, "vad_enable=%s\n", conf->vad_enable ? "yes" : "no");
 	fprintf(file, "vad_level=%hd\n", conf->vad_level);
 	fprintf(file, "cng_enable=%s\n", conf->cng_enable ? "yes" : "no");

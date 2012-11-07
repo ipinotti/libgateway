@@ -41,7 +41,6 @@
 #include "log.h"
 #include "str.h"
 
-
 static int libamg_dahdi_indirect_ioctl(int span, int cmd, void *data)
 {
 	struct dahdi_indirect_data ind;
@@ -78,6 +77,36 @@ static void _get_span_status_alarms(struct libamg_dahdi_span_status *span)
 		span->alarms_str = "RAI";
 	} else {
 		span->alarms_str = "OK";
+	}
+}
+
+char * libamg_dahdi_get_switchtype_name(int switchtype_code)
+{
+	switch (switchtype_code) {
+		case EURO_ISDN_COD:
+			return EURO_ISDN_NAME;
+			break;
+		case NATIONAL_ISDN2_COD:
+			return NATIONAL_ISDN2_NAME;
+			break;
+		case NORTEL_DMS100_COD:
+			return NORTEL_DMS100_NAME;
+			break;
+		case ATeT_4ESS_COD:
+			return ATeT_4ESS_NAME;
+			break;
+		case LUCENT_5ESS_COD:
+			return LUCENT_5ESS_NAME;
+			break;
+		case NATIONAL_ISDN_1_COD:
+			return NATIONAL_ISDN_1_NAME;
+			break;
+		case Q_SIG_COD:
+			return Q_SIG_NAME;
+			break;
+		default:
+			return NULL;
+			break;
 	}
 }
 

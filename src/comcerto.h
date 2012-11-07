@@ -98,6 +98,7 @@ typedef struct libamg_jb_config {
 } libamg_jb_config;
 
 struct libamg_comcerto_config {
+	int ais_enable;
 	int vad_enable;
 	int vad_level;
 	int cng_enable;
