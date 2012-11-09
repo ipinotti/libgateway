@@ -125,6 +125,17 @@ struct jb_params {
 int libamg_dsp_set_jitter_buffer(int conn_id, SVoIPChnlParams *parms, struct jb_params *jb);
 
 
+/**
+ * Set Payload type for codec
+ *
+ * @param conn_id: Connection in question
+ * @param codec: Codec index in question
+ * @param pt: Payload type to be used
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_set_codec_payload_type(int conn_id, ECodecIndex codec, int pt);
+
+
 enum inband_signaling_t {
 	INBAND_SIG_OFF = 		0x00,
 	INBAND_SIG_MF_R2_BCK = 	0x01,

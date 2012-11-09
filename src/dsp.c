@@ -172,6 +172,9 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 	case FC_VOIP_MFDPAR:
 		len += param_size = sizeof(struct _VOIP_MFDPAR);
 		break;
+	case FC_VOIP_PTSET:
+		len += param_size = sizeof(struct _VOIP_PTSET);
+		break;
 	default:
 		return -1;
 	}
@@ -232,6 +235,10 @@ static int _write_mfdpar(int conn_id, struct _VOIP_MFDPAR *opt)
 	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt);
 }
 
+static int _write_ptset(int conn_id, struct _VOIP_PTSET *opt)
+{
+	return _write_opts(conn_id, FC_VOIP_PTSET, (void *)opt);
+}
 
 
 /****************************************************/
@@ -342,6 +349,18 @@ int libamg_dsp_set_jitter_buffer(int conn_id, SVoIPChnlParams *parms, struct jb_
 	opt->deletion_threshold = jb->deletion_threshold;
 
 	return _write_jb_opt(conn_id, opt);
+}
+
+int libamg_dsp_set_codec_payload_type(int conn_id, ECodecIndex codec, int pt)
+{
+	struct _VOIP_PTSET opt;
+
+	amg_dbg("(Channel %d) Setting payload type to %d for codec %d\n", conn_id, pt, codec);
+
+	opt.param_4.bits.pt_index = codec;
+	opt.param_4.bits.pt_value = pt;
+
+	return _write_ptset(conn_id, &opt);
 }
 
 /***********************************************************/
