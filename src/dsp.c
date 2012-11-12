@@ -446,16 +446,38 @@ int libamg_dsp_dequeue_tone_event(int conn_id)
 
 int libamg_dsp_set_mf_r2_timings(int conn_id)
 {
+#if 1
 	struct _VOIP_MFDPAR opt;
 
 	opt.mf_selector = 1; /* R2 */
 
-	/* FIXME Review these values */
-	opt.minimum_off_time = 200;
-	opt.minimum_on_time = 200;
-	opt.maximum_dropout_time = 60;
+	/*
+	 * FIXME Review these values
+	 * Lab tests showed these values to be robust,
+	 * but slow. Maybe we can lower this?
+	 */
 
-	return _write_mfdpar(conn_id, &opt);
+	opt.minimum_off_time = 300;
+	opt.minimum_on_time = 300;
+	opt.maximum_dropout_time = 200;
+
+	if (_write_mfdpar(conn_id, &opt) < 0)
+		return -1;
+
+	return 0;
+#else
+	struct _VOIP_MFTUNE tune;
+
+	tune.frequency_deviation = 12;
+	tune.negative_twist = 100;
+	tune.positive_twist = 100;
+	tune.minimum_level_threshold = 350;
+	tune.snr_threshold = 0;
+	tune.param_9.bits.detection_delay = 3; /* Minimize false detections */
+	tune.mf_selector = 1; /* R2 */
+
+	return _write_mftune(conn_id, &tune);
+#endif
 }
 
 int libamg_dsp_get_inband_signaling(int conn_id)
@@ -483,7 +505,7 @@ int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
 	sigdet_opt = &parms->stSigdet;
 	sigdet_opt->param_4.bits.mode = mode;
 
-	//libamg_dsp_set_mf_r2_timings(conn_id);
+	libamg_dsp_set_mf_r2_timings(conn_id);
 
 	/*
 	 * Must send SIGDET and VOPENA to enable/disable
@@ -496,8 +518,9 @@ int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
 
 	if (mode == INBAND_SIG_OFF)
 		conn_state = eTdmActive;
-	else
+	else {
 		conn_state = eInbandToneDetActive;
+	}
 
 	amg_dbg("Setting connection state to %s\n",
 			conn_state == eInbandToneDetActive ? "Inband detection" : "TDM active");
