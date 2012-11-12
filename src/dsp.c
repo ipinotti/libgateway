@@ -314,8 +314,8 @@ int libamg_dsp_set_echocan(int conn_id, SVoIPChnlParams *parms, int enable, int 
 {
 	struct _VOIP_ECHOCAN *opt = &parms->stEchoCan;
 
-	amg_dbg("%sabling echo cancelling\n",
-	        enable ? "En" : "Dis", conn_id);
+	amg_dbg("(Channel %d) %sabling echo cancelling\n", conn_id,
+	        enable ? "En" : "Dis");
 
 	if (enable)
 		opt->param_4.bits.ecenb = VOIP_ECHOCAN_ECENB_ENABLE;
