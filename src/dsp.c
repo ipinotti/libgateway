@@ -172,6 +172,9 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 	case FC_VOIP_MFDPAR:
 		len += param_size = sizeof(struct _VOIP_MFDPAR);
 		break;
+	case FC_VOIP_MFTUNE:
+		len += param_size = sizeof(struct _VOIP_MFTUNE);
+		break;
 	case FC_VOIP_PTSET:
 		len += param_size = sizeof(struct _VOIP_PTSET);
 		break;
@@ -233,6 +236,11 @@ static int _write_sigdet(int conn_id, struct _VOIP_SIGDET *opt)
 static int _write_mfdpar(int conn_id, struct _VOIP_MFDPAR *opt)
 {
 	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt);
+}
+
+static int _write_mftune(int conn_id, struct _VOIP_MFTUNE *opt)
+{
+	return _write_opts(conn_id, FC_VOIP_MFTUNE, (void *)opt);
 }
 
 static int _write_ptset(int conn_id, struct _VOIP_PTSET *opt)
