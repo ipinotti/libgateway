@@ -42,9 +42,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <asterisk.h>
-#include <asterisk/module.h>
-#include <asterisk/logger.h>
 #include <if.h>
 
 #include "libnetlink/libnetlink.h"
