@@ -170,6 +170,15 @@ int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode);
 int libamg_dsp_set_mf_r2_timings(int conn_id);
 
 /**
+ * Tone Event structure to be used for queuing/dequeing tones
+ */
+struct tone_event_t {
+	int conn_id;
+	int tone;
+	struct tone_event_t *next;
+};
+
+/**
  * Dequeue any existing tone event for a certain connection
  *
  * @param The Connection ID
@@ -185,7 +194,7 @@ int libamg_dsp_dequeue_tone_event(int conn_id);
  * @return 0 if success, -1 if error
  *
  */
-int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone);
+int libamg_dsp_queue_tone_event(struct tone_event_t *tone);
 
 /**
  *	Translate tones from binary (Comcerto) to ASCII (OpenR2)

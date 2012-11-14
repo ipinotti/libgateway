@@ -40,15 +40,6 @@
 
 #include "dsp.h"
 
-/**
- * Tone Event structure to be used for queuing/dequeing tones
- */
-struct tone_event_t {
-	int conn_id;
-	int tone;
-	struct tone_event_t *next;
-};
-
 /* Base of tone list */
 static struct tone_event_t base_tone_event = {
 		.conn_id = -1,
@@ -375,7 +366,7 @@ int libamg_dsp_set_codec_payload_type(int conn_id, ECodecIndex codec, int pt)
 /******************* Tone queue ****************************/
 /***********************************************************/
 
-int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone)
+int libamg_dsp_queue_tone_event(struct tone_event_t *tone)
 {
 	struct tone_event_t *t, *tmp;
 
@@ -385,8 +376,8 @@ int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone)
 		return -1;
 	}
 
-	t->conn_id = tone->ConId;
-	t->tone = tone->usDetectedTone;
+	t->conn_id = tone->conn_id;
+	t->tone = tone->tone;
 	t->next = NULL;
 
 	pthread_mutex_lock(&tone_mutex);
