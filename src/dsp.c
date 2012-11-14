@@ -40,15 +40,6 @@
 
 #include "dsp.h"
 
-/**
- * Tone Event structure to be used for queuing/dequeing tones
- */
-struct tone_event_t {
-	int conn_id;
-	int tone;
-	struct tone_event_t *next;
-};
-
 /* Base of tone list */
 static struct tone_event_t base_tone_event = {
 		.conn_id = -1,
@@ -58,15 +49,15 @@ static struct tone_event_t base_tone_event = {
 
 
 /* Mutexes */
-pthread_mutex_t tone_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t channel_mutex[32];
+static pthread_mutex_t tone_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t channel_mutex[32];
 
-int __channel_lock(int conn_id)
+static int __channel_lock(int conn_id)
 {
 	return pthread_mutex_lock(&channel_mutex[conn_id]);
 }
 
-int __channel_unlock(int conn_id)
+static int __channel_unlock(int conn_id)
 {
 	return pthread_mutex_unlock(&channel_mutex[conn_id]);
 }
@@ -132,7 +123,7 @@ static int __write_to_device(U16 conn_id, SMsg *data)
  * @param opt	   : Payload
  * @return 0 if success, -1 if error
  */
-static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
+static int _write_opts(int conn_id, unsigned short opt_type, void *opt, int opt_len)
 {
 	void *config;
 	int len, status, param_size;
@@ -146,35 +137,7 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 	 */
 	len = sizeof(struct comcerto_api_hdr);
 	len += PADDING_SIZE * 2; /* Someone figure this out, plz ? */
-
-	switch (opt_type) {
-	case FC_VOIP_VOPENA:
-		len += param_size = sizeof(struct _VOIP_VOPENA);
-		break;
-	case FC_VOIP_VCEOPT:
-		len += param_size = sizeof(struct _VOIP_VCEOPT);
-		break;
-	case FC_VOIP_DTMFOPT:
-		len += param_size = sizeof(struct _VOIP_DTMFOPT);
-		break;
-	case FC_VOIP_ECHOCAN:
-		len += param_size = sizeof(struct _VOIP_ECHOCAN);
-		break;
-	case FC_VOIP_JBOPT:
-		len += param_size = sizeof(struct _VOIP_JBOPT);
-		break;
-	case FC_VOIP_DGAIN:
-		len += param_size = sizeof(struct _VOIP_DGAIN);
-		break;
-	case FC_VOIP_SIGDET:
-		len += param_size = sizeof(struct _VOIP_SIGDET);
-		break;
-	case FC_VOIP_MFDPAR:
-		len += param_size = sizeof(struct _VOIP_MFDPAR);
-		break;
-	default:
-		return -1;
-	}
+	len += param_size = opt_len;
 
 	config = VAPI_AllocateMessage(len);
 	if (config == NULL)
@@ -199,39 +162,48 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 
 static int _write_vceopt(int conn_id, struct _VOIP_VCEOPT *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_VCEOPT, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_VCEOPT, (void *)opt, sizeof(struct _VOIP_VCEOPT));
 }
 
 static int _write_dtmfopt(int conn_id, struct _VOIP_DTMFOPT *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_DTMFOPT, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_DTMFOPT, (void *)opt, sizeof(struct _VOIP_DTMFOPT));
 }
 
 static int _write_echocan_opt(int conn_id, struct _VOIP_ECHOCAN *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_ECHOCAN, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_ECHOCAN, (void *)opt, sizeof(struct _VOIP_ECHOCAN));
 }
 
 static int _write_jb_opt(int conn_id, struct _VOIP_JBOPT *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_JBOPT, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_JBOPT, (void *)opt, sizeof(struct _VOIP_JBOPT));
 }
 
 static int _write_dgain(int conn_id, struct _VOIP_DGAIN *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_DGAIN, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_DGAIN, (void *)opt, sizeof(struct _VOIP_DGAIN));
 }
 
 static int _write_sigdet(int conn_id, struct _VOIP_SIGDET *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_SIGDET, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_SIGDET, (void *)opt, sizeof(struct _VOIP_SIGDET));
 }
 
 static int _write_mfdpar(int conn_id, struct _VOIP_MFDPAR *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt, sizeof(struct _VOIP_MFDPAR));
 }
 
+static int _write_ptset(int conn_id, struct _VOIP_PTSET *opt)
+{
+	return _write_opts(conn_id, FC_VOIP_PTSET, (void *)opt, sizeof(struct _VOIP_PTSET));
+}
+
+static int _write_autoswitch(int conn_id, struct _SET_PASSTHRU_AUTOSWITCH *opt)
+{
+	return _write_opts(conn_id, FC_SET_PASSTHRU_AUTOSWITCH, (void *)opt, sizeof(struct _SET_PASSTHRU_AUTOSWITCH));
+}
 
 
 /****************************************************/
@@ -299,8 +271,8 @@ int libamg_dsp_set_echocan(int conn_id, SVoIPChnlParams *parms, int enable, int 
 {
 	struct _VOIP_ECHOCAN *opt = &parms->stEchoCan;
 
-	amg_dbg("%sabling echo cancelling\n",
-	        enable ? "En" : "Dis", conn_id);
+	amg_dbg("(Channel %d) %sabling echo cancelling\n", conn_id,
+	        enable ? "En" : "Dis");
 
 	if (enable)
 		opt->param_4.bits.ecenb = VOIP_ECHOCAN_ECENB_ENABLE;
@@ -344,64 +316,23 @@ int libamg_dsp_set_jitter_buffer(int conn_id, SVoIPChnlParams *parms, struct jb_
 	return _write_jb_opt(conn_id, opt);
 }
 
-int libamg_dsp_set_mf_r2_timings(int conn_id)
+int libamg_dsp_set_codec_payload_type(int conn_id, ECodecIndex codec, int pt)
 {
-	struct _VOIP_MFDPAR opt;
+	struct _VOIP_PTSET opt;
 
-	opt.mf_selector = 1; /* R2 */
+	amg_dbg("(Channel %d) Setting payload type to %d for codec %d\n", conn_id, pt, codec);
 
-	/* FIXME Review these values */
-	opt.minimum_off_time = 200;
-	opt.minimum_on_time = 200;
-	opt.maximum_dropout_time = 60;
+	opt.param_4.bits.pt_index = codec;
+	opt.param_4.bits.pt_value = pt;
 
-	return _write_mfdpar(conn_id, &opt);
+	return _write_ptset(conn_id, &opt);
 }
 
-int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
-{
-	SVoIPChnlParams *parms;
-	struct _VOIP_SIGDET *sigdet_opt;
-	EConnOpMode conn_state;
+/***********************************************************/
+/******************* Tone queue ****************************/
+/***********************************************************/
 
-	amg_dbg("(Channel %d): %sabling MFC R2 tone detection\n",
-			conn_id, mode == INBAND_SIG_OFF ? "Dis" : "En");
-
-	if (VAPI_GetChnl_Info(conn_id, &parms) != SUCCESS)
-		return -1;
-
-	sigdet_opt = &parms->stSigdet;
-	sigdet_opt->param_4.bits.mode = mode;
-
-	libamg_dsp_set_mf_r2_timings(conn_id);
-
-	/*
-	 * Must send SIGDET and VOPENA to enable/disable
-	 * inband signaling detection
-	 */
-	if (_write_sigdet(conn_id, sigdet_opt) < 0) {
-		amg_err("Error sending SIGDET for connection %d\n", conn_id);
-		return -1;
-	}
-
-	if (mode == INBAND_SIG_OFF)
-		conn_state = eTdmActive;
-	else
-		conn_state = eInbandToneDetActive;
-
-	amg_dbg("Setting connection state to %s\n",
-			conn_state == eInbandToneDetActive ? "Inband detection" : "TDM active");
-	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
-		amg_err("(Channel %d): Error setting connection state to %s mode\n",
-				conn_id, conn_state == eInbandToneDetActive ?
-						"Inband detection" : "TDM active");
-		return -1;
-	}
-
-	return 0;
-}
-
-int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone)
+int libamg_dsp_queue_tone_event(struct tone_event_t *tone)
 {
 	struct tone_event_t *t, *tmp;
 
@@ -411,8 +342,8 @@ int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone)
 		return -1;
 	}
 
-	t->conn_id = tone->ConId;
-	t->tone = tone->usDetectedTone;
+	t->conn_id = tone->conn_id;
+	t->tone = tone->tone;
 	t->next = NULL;
 
 	pthread_mutex_lock(&tone_mutex);
@@ -464,6 +395,85 @@ int libamg_dsp_dequeue_tone_event(int conn_id)
 #endif
 
 	return tone;
+}
+
+/*********************************************************/
+/********************** MF R2 ****************************/
+/*********************************************************/
+
+int libamg_dsp_set_mf_r2_timings(int conn_id)
+{
+	struct _VOIP_MFDPAR opt;
+
+	opt.mf_selector = 1; /* R2 */
+
+	/*
+	 * FIXME Review these values
+	 * Lab tests showed these values to be robust,
+	 * but slow. Maybe we can lower this?
+	 */
+
+	opt.minimum_off_time = 200;
+	opt.minimum_on_time = 200;
+	opt.maximum_dropout_time = 100;
+
+	if (_write_mfdpar(conn_id, &opt) < 0)
+		return -1;
+
+	return 0;
+}
+
+int libamg_dsp_get_inband_signaling(int conn_id)
+{
+	SVoIPChnlParams *parms;
+
+	if (VAPI_GetChnl_Info(conn_id, &parms) != SUCCESS)
+		return -1;
+
+	return parms->stSigdet.param_4.bits.mode;
+}
+
+int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
+{
+	SVoIPChnlParams *parms;
+	struct _VOIP_SIGDET *sigdet_opt;
+	EConnOpMode conn_state;
+
+	amg_dbg("(Channel %d): %sabling MFC R2 tone detection\n",
+			conn_id, mode == INBAND_SIG_OFF ? "Dis" : "En");
+
+	if (VAPI_GetChnl_Info(conn_id, &parms) != SUCCESS)
+		return -1;
+
+	sigdet_opt = &parms->stSigdet;
+	sigdet_opt->param_4.bits.mode = mode;
+
+
+	/*
+	 * Must send SIGDET and VOPENA to enable/disable
+	 * inband signaling detection
+	 */
+	if (_write_sigdet(conn_id, sigdet_opt) < 0) {
+		amg_err("Error sending SIGDET for connection %d\n", conn_id);
+		return -1;
+	}
+
+	if (mode == INBAND_SIG_OFF)
+		conn_state = eTdmActive;
+	else {
+		conn_state = eInbandToneDetActive;
+	}
+
+	amg_dbg("Setting connection state to %s\n",
+			conn_state == eInbandToneDetActive ? "Inband detection" : "TDM active");
+	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
+		amg_err("(Channel %d): Error setting connection state to %s mode\n",
+				conn_id, conn_state == eInbandToneDetActive ?
+						"Inband detection" : "TDM active");
+		return -1;
+	}
+
+	return 0;
 }
 
 static const char r2_mf_tone_codes[] = "1234567890BCDEF"; /* Borrowed from OpenR2 */
@@ -542,4 +552,84 @@ int libamg_dsp_mfcr2_stop_tone(int conn_id)
 	__channel_unlock(conn_id);
 
 	return ret;
+}
+
+/*********************************************************/
+/********************** DTMF *****************************/
+/*********************************************************/
+
+int libamg_dsp_dtmf_start_tone(int conn_id, char tone)
+{
+	int i, ret;
+	int tone_id = -1;
+
+	struct tone_map_t map[] = {
+			{ '1', eDTMFTONE_1 },
+			{ '2', eDTMFTONE_2 },
+			{ '3', eDTMFTONE_3 },
+			{ '4', eDTMFTONE_4 },
+			{ '5', eDTMFTONE_5 },
+			{ '6', eDTMFTONE_6 },
+			{ '7', eDTMFTONE_7 },
+			{ '8', eDTMFTONE_8 },
+			{ '9', eDTMFTONE_9 },
+			{ '0', eDTMFTONE_0 },
+			{ '*', eDTMFTONE_STAR },
+			{ '#', eDTMFTONE_HASH },
+			{ 'A', eDTMFTONE_A },
+			{ 'B', eDTMFTONE_B },
+			{ 'C', eDTMFTONE_C },
+			{ 'D', eDTMFTONE_D },
+			{ '\0', 0 },
+	};
+
+	amg_dbg("(Channel %d) : Playing DTMF tone %c\n", conn_id, tone);
+
+	for (i = 0; map[i].tone != '\0'; i++) {
+		if (tone == map[i].tone) {
+				tone_id =  map[i].id;
+		}
+	}
+
+	if (tone_id < 0) {
+		amg_err("(Channel %d) DTMF: Could not generate tone %c\n", conn_id, tone);
+		return -1;
+	}
+
+	__channel_lock(conn_id);
+	ret = VAPI_PlayTone(conn_id, tone_id, eDirToTDM, NULL, 0, NULL);
+	__channel_unlock(conn_id);
+
+	return ret;
+}
+
+int libamg_dsp_dtmf_stop_tone(int conn_id)
+{
+	int ret;
+
+	amg_dbg("(Channel %d) : Stopping DTMF tone\n", conn_id);
+
+	__channel_lock(conn_id);
+	ret = VAPI_StopTone(conn_id, 0, eDirToTDM, NULL);
+	__channel_unlock(conn_id);
+
+	return ret;
+}
+
+int libamg_dsp_fax_autoswitch_set(int conn_id)
+{
+	struct _SET_PASSTHRU_AUTOSWITCH opt;
+
+	amg_dbg("(Channel %d) Enabling FAX autoswitch\n", conn_id);
+
+	memset(&opt, 0, sizeof(opt));
+
+	opt.param_4.bits.pt_autoswitch = 5; /* Fax Pass-through '101' */
+	opt.param_4.bits.sw_ind = 1; /* Enable host indication */
+	opt.param_4.bits.ptchng = 1; /* Autoswitch when VBD in RTP */
+	opt.param_4.bits.rfc2833 = 1; /* Autoswitch when RFC2833 in RTP: Should we test dtmfmode? */
+
+	opt.param_6.bits.delay = 60; /* default jitter buffer delay */
+
+	return _write_autoswitch(conn_id, &opt);
 }

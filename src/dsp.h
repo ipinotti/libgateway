@@ -125,11 +125,32 @@ struct jb_params {
 int libamg_dsp_set_jitter_buffer(int conn_id, SVoIPChnlParams *parms, struct jb_params *jb);
 
 
+/**
+ * Set Payload type for codec
+ *
+ * @param conn_id: Connection in question
+ * @param codec: Codec index in question
+ * @param pt: Payload type to be used
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_set_codec_payload_type(int conn_id, ECodecIndex codec, int pt);
+
+
 enum inband_signaling_t {
 	INBAND_SIG_OFF = 		0x00,
 	INBAND_SIG_MF_R2_BCK = 	0x01,
 	INBAND_SIG_MF_R2_FWD = 	0x02,
 };
+
+/**
+ * Get current inband signaling mode
+ *
+ * Returns the inband signaling mode enabled: R2 backward, R2 forward or disabled (DTMF)
+ *
+ * @param conn_id: Connection in question
+ * @return signaling mode or negative if error
+ */
+int libamg_dsp_get_inband_signaling(int conn_id);
 
 /**
  * Set inband signaling mode
@@ -140,7 +161,6 @@ enum inband_signaling_t {
  * @param conn_id: Connection in question
  * @param mode: Signaling mode to be set
  * @return 0 if success, negative if error
- *
  */
 int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode);
 
@@ -148,6 +168,15 @@ int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode);
  * Set MF R2 timing definitions
  */
 int libamg_dsp_set_mf_r2_timings(int conn_id);
+
+/**
+ * Tone Event structure to be used for queuing/dequeing tones
+ */
+struct tone_event_t {
+	int conn_id;
+	int tone;
+	struct tone_event_t *next;
+};
 
 /**
  * Dequeue any existing tone event for a certain connection
@@ -165,7 +194,7 @@ int libamg_dsp_dequeue_tone_event(int conn_id);
  * @return 0 if success, -1 if error
  *
  */
-int libamg_dsp_queue_tone_event(SToneDetectEventParams *tone);
+int libamg_dsp_queue_tone_event(struct tone_event_t *tone);
 
 /**
  *	Translate tones from binary (Comcerto) to ASCII (OpenR2)
@@ -199,5 +228,30 @@ int libamg_dsp_mfcr2_stop_tone(int conn_id);
  * @return Always 0
  */
 int libamg_dsp_channel_lock_init(void);
+
+/**
+ * Start playing DTMF tone in channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @param tone
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_dtmf_start_tone(int conn_id, char tone);
+
+/**
+ * Stop playing DTMF tone in channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_dtmf_stop_tone(int conn_id);
+
+/**
+ * Enable autoswitch on channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_fax_autoswitch_set(int conn_id);
 
 #endif /* DSP_H_ */
