@@ -246,4 +246,12 @@ int libamg_dsp_dtmf_start_tone(int conn_id, char tone);
  */
 int libamg_dsp_dtmf_stop_tone(int conn_id);
 
+/**
+ * Enable autoswitch on channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_fax_autoswitch_set(int conn_id);
+
 #endif /* DSP_H_ */

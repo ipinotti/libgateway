@@ -630,3 +630,21 @@ int libamg_dsp_dtmf_stop_tone(int conn_id)
 
 	return ret;
 }
+
+int libamg_dsp_fax_autoswitch_set(int conn_id)
+{
+	struct _SET_PASSTHRU_AUTOSWITCH opt;
+
+	amg_dbg("(Channel %d) Enabling FAX autoswitch\n", conn_id);
+
+	memset(&opt, 0, sizeof(opt));
+
+	opt.param_4.bits.pt_autoswitch = 5; /* Fax Pass-through '101' */
+	opt.param_4.bits.sw_ind = 1; /* Enable host indication */
+	opt.param_4.bits.ptchng = 1; /* Autoswitch when VBD in RTP */
+	opt.param_4.bits.rfc2833 = 1; /* Autoswitch when RFC2833 in RTP: Should we test dtmfmode? */
+
+	opt.param_6.bits.delay = 60; /* default jitter buffer delay */
+
+	return _write_autoswitch(conn_id, &opt);
+}
