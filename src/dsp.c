@@ -49,15 +49,15 @@ static struct tone_event_t base_tone_event = {
 
 
 /* Mutexes */
-pthread_mutex_t tone_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t channel_mutex[32];
+static pthread_mutex_t tone_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t channel_mutex[32];
 
-int __channel_lock(int conn_id)
+static int __channel_lock(int conn_id)
 {
 	return pthread_mutex_lock(&channel_mutex[conn_id]);
 }
 
-int __channel_unlock(int conn_id)
+static int __channel_unlock(int conn_id)
 {
 	return pthread_mutex_unlock(&channel_mutex[conn_id]);
 }
