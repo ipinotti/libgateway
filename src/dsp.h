@@ -229,7 +229,21 @@ int libamg_dsp_mfcr2_stop_tone(int conn_id);
  */
 int libamg_dsp_channel_lock_init(void);
 
+/**
+ * Start playing DTMF tone in channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @param tone
+ * @return 0 if success, negative if error
+ */
 int libamg_dsp_dtmf_start_tone(int conn_id, char tone);
+
+/**
+ * Stop playing DTMF tone in channel
+ *
+ * @param conn_id: Which channel to act upon
+ * @return 0 if success, negative if error
+ */
 int libamg_dsp_dtmf_stop_tone(int conn_id);
 
 #endif /* DSP_H_ */
