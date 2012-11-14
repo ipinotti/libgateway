@@ -49,7 +49,8 @@
 				"usecallerid=yes\n" \
 				"echocancelwhenbridged=no\n" \
 				"buffers=8,half\n" \
-				"context=from-e1\n" \
+				"context=from-span1\n" \
+				"group=1\n" \
 				"mfcr2_variant=br\n" \
 				"mfcr2_category=national_subscriber\n" \
 				"mfcr2_mfback_timeout=5000\n" \
@@ -61,20 +62,20 @@
 #define BUF_SIZE	256
 
 /* Dahdi Switchtype References - related to spec -- parks_apvs_desc_v03.docx */
-#define Q_SIG_NAME				"qsig"		//Q.SIG
-#define Q_SIG_COD				40
-#define NATIONAL_ISDN_1_NAME	"ni1"		//Old National ISDN 1
-#define NATIONAL_ISDN_1_COD		20
-#define LUCENT_5ESS_NAME		"5ess"		//Lucent 5ESS
-#define LUCENT_5ESS_COD			10
-#define ATeT_4ESS_NAME			"4ess"		//AT&T 4ESS
-#define ATeT_4ESS_COD			8
-#define NORTEL_DMS100_NAME		"dms100"	//Nortel DMS100
-#define NORTEL_DMS100_COD		4
-#define NATIONAL_ISDN2_NAME		"national"	//National ISDN 2
-#define NATIONAL_ISDN2_COD		2
-#define EURO_ISDN_NAME			"euroisdn"	//EuroISDN (common in Europe)
-#define EURO_ISDN_COD			1
+#define DAHDI_SWITCHT_Q_SIG_NAME				"qsig"		//Q.SIG
+#define DAHDI_SWITCHT_Q_SIG_COD					0x40
+#define DAHDI_SWITCHT_NATIONAL_ISDN_1_NAME		"ni1"		//Old National ISDN 1
+#define DAHDI_SWITCHT_NATIONAL_ISDN_1_COD		0x20
+#define DAHDI_SWITCHT_LUCENT_5ESS_NAME			"5ess"		//Lucent 5ESS
+#define DAHDI_SWITCHT_LUCENT_5ESS_COD			0x10
+#define DAHDI_SWITCHT_ATeT_4ESS_NAME			"4ess"		//AT&T 4ESS
+#define DAHDI_SWITCHT_ATeT_4ESS_COD				0x8
+#define DAHDI_SWITCHT_NORTEL_DMS100_NAME		"dms100"	//Nortel DMS100
+#define DAHDI_SWITCHT_NORTEL_DMS100_COD			0x4
+#define DAHDI_SWITCHT_NATIONAL_ISDN2_NAME		"national"	//National ISDN 2
+#define DAHDI_SWITCHT_NATIONAL_ISDN2_COD		0x2
+#define DAHDI_SWITCHT_EURO_ISDN_NAME			"euroisdn"	//EuroISDN (common in Europe)
+#define DAHDI_SWITCHT_EURO_ISDN_COD				0x1
 
 
 

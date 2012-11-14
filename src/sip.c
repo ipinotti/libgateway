@@ -96,50 +96,54 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "jbdelet_thrld")) {
 			conf->jb_conf.jb_delet_thrld = atoi(value);
 #endif
+		} else if (!strcmp(key, "register")) {
+			conf->register_enable = 1;
+			/* TODO get other parameters... */
+
 			/* Account confs*/
 		} else if (!strcmp(key, "host")) {
-			strncpy(account->host, value, 31);
+			strncpy(account->host, value, 63);
 		} else if (!strcmp(key, "port")) {
 			account->port = atoi(value);
 		} else if (!strcmp(key, "username")) {
-			strncpy(account->username, value, 31);
+			strncpy(account->username, value, 63);
 		} else if (!strcmp(key, "secret")) {
-			strncpy(account->secret, value, 31);
+			strncpy(account->secret, value, 63);
 		} else if (!strcmp(key, "dtmfmode")) {
 			strncpy(account->dtmfmode, value, 31);
-		} else if (!strcmp(key, "allow")) {
-			if (!strcmp(value, G711_A))
+		}
+#ifdef ABANDONED
+		else if (!strcmp(key, "allow")) {
+			if (!strcmp(value, CODEC_G711_A))
 				account->allow.g711_A = 1;
-			else if (!strcmp(value, G711_U))
+			else if (!strcmp(value, CODEC_G711_U))
 					account->allow.g711_U = 1;
-			else if (!strcmp(value, G723_1))
+			else if (!strcmp(value, CODEC_G723_1))
 					account->allow.g723_1 = 1;
-			else if (!strcmp(value, G726_16Kbps))
+			else if (!strcmp(value, CODEC_G726_16Kbps))
 					account->allow.g726_16kbps = 1;
-			else if (!strcmp(value, G726_24Kbps))
+			else if (!strcmp(value, CODEC_G726_24Kbps))
 					account->allow.g726_24kbps = 1;
-			else if (!strcmp(value, G726_32Kbps))
+			else if (!strcmp(value, CODEC_G726_32Kbps))
 					account->allow.g726_32kbps = 1;
-			else if (!strcmp(value, G726_40Kbps))
+			else if (!strcmp(value, CODEC_G726_40Kbps))
 					account->allow.g726_40kbps = 1;
-			else if (!strcmp(value, G729))
+			else if (!strcmp(value, CODEC_G729))
 					account->allow.g729 = 1;
-			else if (!strcmp(value, GSM))
+			else if (!strcmp(value, CODEC_GSM))
 					account->allow.gsm = 1;
-#ifdef NOT_SUPPORTED_AMG
-		} else if (!strcmp(key, "register")) {
-			account->register_enable = 1;
-		} else if (!strcmp(key, "nat")) {
+		}
+#endif
+		 else if (!strcmp(key, "nat")) {
 			account->nat = !strcmp(value, "yes");
 		} else if (!strcmp(key, "qualify")) {
 			account->qualify = !strcmp(value, "yes");
 		} else if (!strcmp(key, "insecure")) {
 			strncpy(account->insecure, value, 31);
 		} else if (!strcmp(key, "callerid")) {
-			strncpy(account->callerid, value, 31);
+			strncpy(account->callerid, value, 63);
 		} else if (!strcmp(key, "fromuser")) {
-			strncpy(account->fromuser, value, 31);
-#endif
+			strncpy(account->fromuser, value, 63);
 		}
 	}
 
@@ -164,7 +168,7 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	fprintf(file, "%s", SIP_GENERAL_CONTENT);
 
 	/* Jitter Buffer Confs (Same as Comcerto confs) */
-	fprintf(file, "jbenable=%s\n", conf->jb_conf.jb_enable ? "yes" : "no"); /* ALWAYS ON FOR COMCERTO*/
+	fprintf(file, "jbenable=%s\n", "yes"); /* ALWAYS ON FOR COMCERTO*/
 	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);
 	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptative" : "fixed");
 #ifdef NOT_YET_SUPPORTED
@@ -204,25 +208,26 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	fprintf(file, "secret=%s\n", account->secret);
 	fprintf(file, "dtmfmode=%s\n", account->dtmfmode);
 
+#ifdef ABANDONED
 	if (account->allow.g711_A)
-		fprintf(file, "allow=%s\n", G711_A);
+		fprintf(file, "allow=%s\n", CODEC_G711_A);
 	if (account->allow.g711_U)
-		fprintf(file, "allow=%s\n", G711_U);
+		fprintf(file, "allow=%s\n", CODEC_G711_U);
 	if (account->allow.g723_1)
-		fprintf(file, "allow=%s\n", G723_1);
+		fprintf(file, "allow=%s\n", CODEC_G723_1);
 	if (account->allow.g726_16kbps)
-		fprintf(file, "allow=%s\n", G726_16Kbps);
+		fprintf(file, "allow=%s\n", CODEC_G726_16Kbps);
 	if (account->allow.g726_24kbps)
-		fprintf(file, "allow=%s\n", G726_24Kbps);
+		fprintf(file, "allow=%s\n", CODEC_G726_24Kbps);
 	if (account->allow.g726_32kbps)
-		fprintf(file, "allow=%s\n", G726_32Kbps);
+		fprintf(file, "allow=%s\n", CODEC_G726_32Kbps);
 	if (account->allow.g726_40kbps)
-		fprintf(file, "allow=%s\n", G726_40Kbps);
+		fprintf(file, "allow=%s\n", CODEC_G726_40Kbps);
 	if (account->allow.g729)
-		fprintf(file, "allow=%s\n", G729);
+		fprintf(file, "allow=%s\n", CODEC_G729);
 	if (account->allow.gsm)
-		fprintf(file, "allow=%s\n", GSM);
-
+		fprintf(file, "allow=%s\n", CODEC_GSM);
+#endif
 
 	fclose(file);
 

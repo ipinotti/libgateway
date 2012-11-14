@@ -45,59 +45,74 @@
 #define SIP_GENERAL_CONTENT	"[general]\n" \
 				"context=from-sip\n" \
 				"disallow=all\n" \
-				"bindaddr=0.0.0.0\n"
+				"srvlookup=yes\n" \
+				"bindaddr=0.0.0.0\n" \
+				"useragent=Parks AMG\n" \
+				"engine=comcerto\n"
 
 #define SIP_ACCOUNT_CONTENT	"\n[User1]\n" \
 				"#include sip_account_custom.conf\n" \
 				"type=friend\n"
 
-/* Codecs */
-#define G711_A "alaw"
-#define G711_U "ulaw"
-#define G723_1 "g723"
-#define G726_16Kbps "g726-16"
-#define G726_24Kbps "g726-24"
-#define G726_32Kbps "g726-32"
-#define G726_40Kbps "g726-40"
-#define G729 "g729"
-#define GSM "gsm"
+#define SIP_ACCOUNT_NAME "User1"
 
+/* Codecs */
+#define CODEC_G711_A 			"alaw"
+#define CODEC_G711_A_COD		0x100
+#define CODEC_G711_U 			"ulaw"
+#define CODEC_G711_U_COD		0x80
+#define CODEC_G723_1 			"g723"
+#define CODEC_G723_1_COD		0x40
+#define CODEC_G726_16Kbps 		"g726-16"
+#define CODEC_G726_16Kbps_COD	0x20
+#define CODEC_G726_24Kbps 		"g726-24"
+#define CODEC_G726_24Kbps_COD	0x10
+#define CODEC_G726_32Kbps 		"g726-32"
+#define CODEC_G726_32Kbps_COD	0x8
+#define CODEC_G726_40Kbps 		"g726-40"
+#define CODEC_G726_40Kbps_COD	0x4
+#define CODEC_G729 				"g729"
+#define CODEC_G729_COD			0x2
+#define CODEC_GSM 				"gsm"
+#define CODEC_GSM_COD			0x1
+
+/* DTMF Modes*/
+#define DTMF_MODE_IN_BAND			"inband"
+#define DTMF_MODE_IN_BAND_COD		0x4
+#define DTMF_MODE_RFC2833			"rfc2833"
+#define DTMF_MODE_RFC2833_COD		0x2
+#define DTMF_MODE_SIP_INFO			"info"
+#define DTMF_MODE_SIP_INFO_COD		0x1
+
+#define ON_DEFAULT	1
+#define OFF_DEFAULT	0
+#define TCP_UDP_ADDR_DEFAULT "0.0.0.0"
 
 /*
  * General Structures
  */
 
-typedef struct libamg_sip_codecs {
-	unsigned int gsm:1;
-	unsigned int g729:1;
-	unsigned int g726_40kbps:1;
-	unsigned int g726_32kbps:1;
-	unsigned int g726_24kbps:1;
-	unsigned int g726_16kbps:1;
-	unsigned int g723_1:1;
-	unsigned int g711_U:1;
-	unsigned int g711_A:1;
-}libamg_sip_codecs;
-
 struct libamg_sip_account {
-#ifdef NOT_SUPPORTED_AMG
-	int register_enable;
 	int nat;
 	int qualify;
-	char callerid[32];
-	char fromuser[32];
+	char callerid[64];
+	char fromuser[64];
 	char insecure[32];
-#endif
-	char username[32];
-	char secret[32];
-	char host[32];
+	char username[64];
+	char secret[64];
+	char host[64];
 	unsigned short port;
 	char dtmfmode[32];
-	libamg_sip_codecs allow;
+	int allow[18];
 };
 
 struct libamg_sip_config {
 	unsigned short bindport;
+	int tcpenable;
+	int defaultexpiry;
+	int register_enable;
+	char register_username[64];
+	char register_secret[64];
 	libamg_jb_config jb_conf;
 	struct libamg_sip_account accounts[NUM_SIP_ACCOUNTS];
 };

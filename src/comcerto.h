@@ -80,7 +80,11 @@
 /*
  * General Defines
  */
-#define FILE_COMCERTO_CONF		"/etc/asterisk/comcerto_tdm.conf"
+#define FILE_COMCERTO_CONF		"/etc/asterisk/comcerto.conf"
+
+#define ON_DEFAULT	1
+#define OFF_DEFAULT	0
+
 
 /*
  * General Structures

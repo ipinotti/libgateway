@@ -149,7 +149,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "e1_enable=%s\n", conf->e1_enable ? "yes" : "no");
 	fprintf(file, "e1_loopback_enable=%s\n", conf->e1_loopback_enable ? "yes" : "no");
 	/* Jitter Buffer configs */
-	fprintf(file, "jbenable=%s\n", conf->jb_conf.jb_enable ? "yes" : "no"); /* ALWAYS ON FOR COMCERTO*/
+	fprintf(file, "jbenable=%s\n", "yes"); /* ALWAYS ON FOR COMCERTO*/
 	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);
 	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptative" : "fixed");
 	fprintf(file, "jbmindelay=%hd\n", conf->jb_conf.jb_mindelay);
