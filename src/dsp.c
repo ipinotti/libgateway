@@ -123,7 +123,7 @@ static int __write_to_device(U16 conn_id, SMsg *data)
  * @param opt	   : Payload
  * @return 0 if success, -1 if error
  */
-static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
+static int _write_opts(int conn_id, unsigned short opt_type, void *opt, int opt_len)
 {
 	void *config;
 	int len, status, param_size;
@@ -137,41 +137,7 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 	 */
 	len = sizeof(struct comcerto_api_hdr);
 	len += PADDING_SIZE * 2; /* Someone figure this out, plz ? */
-
-	switch (opt_type) {
-	case FC_VOIP_VOPENA:
-		len += param_size = sizeof(struct _VOIP_VOPENA);
-		break;
-	case FC_VOIP_VCEOPT:
-		len += param_size = sizeof(struct _VOIP_VCEOPT);
-		break;
-	case FC_VOIP_DTMFOPT:
-		len += param_size = sizeof(struct _VOIP_DTMFOPT);
-		break;
-	case FC_VOIP_ECHOCAN:
-		len += param_size = sizeof(struct _VOIP_ECHOCAN);
-		break;
-	case FC_VOIP_JBOPT:
-		len += param_size = sizeof(struct _VOIP_JBOPT);
-		break;
-	case FC_VOIP_DGAIN:
-		len += param_size = sizeof(struct _VOIP_DGAIN);
-		break;
-	case FC_VOIP_SIGDET:
-		len += param_size = sizeof(struct _VOIP_SIGDET);
-		break;
-	case FC_VOIP_MFDPAR:
-		len += param_size = sizeof(struct _VOIP_MFDPAR);
-		break;
-	case FC_VOIP_MFTUNE:
-		len += param_size = sizeof(struct _VOIP_MFTUNE);
-		break;
-	case FC_VOIP_PTSET:
-		len += param_size = sizeof(struct _VOIP_PTSET);
-		break;
-	default:
-		return -1;
-	}
+	len += param_size = opt_len;
 
 	config = VAPI_AllocateMessage(len);
 	if (config == NULL)
@@ -196,47 +162,47 @@ static int _write_opts(int conn_id, unsigned short opt_type, void *opt)
 
 static int _write_vceopt(int conn_id, struct _VOIP_VCEOPT *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_VCEOPT, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_VCEOPT, (void *)opt, sizeof(struct _VOIP_VCEOPT));
 }
 
 static int _write_dtmfopt(int conn_id, struct _VOIP_DTMFOPT *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_DTMFOPT, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_DTMFOPT, (void *)opt, sizeof(struct _VOIP_DTMFOPT));
 }
 
 static int _write_echocan_opt(int conn_id, struct _VOIP_ECHOCAN *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_ECHOCAN, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_ECHOCAN, (void *)opt, sizeof(struct _VOIP_ECHOCAN));
 }
 
 static int _write_jb_opt(int conn_id, struct _VOIP_JBOPT *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_JBOPT, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_JBOPT, (void *)opt, sizeof(struct _VOIP_JBOPT));
 }
 
 static int _write_dgain(int conn_id, struct _VOIP_DGAIN *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_DGAIN, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_DGAIN, (void *)opt, sizeof(struct _VOIP_DGAIN));
 }
 
 static int _write_sigdet(int conn_id, struct _VOIP_SIGDET *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_SIGDET, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_SIGDET, (void *)opt, sizeof(struct _VOIP_SIGDET));
 }
 
 static int _write_mfdpar(int conn_id, struct _VOIP_MFDPAR *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt);
-}
-
-static int _write_mftune(int conn_id, struct _VOIP_MFTUNE *opt)
-{
-	return _write_opts(conn_id, FC_VOIP_MFTUNE, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt, sizeof(struct _VOIP_MFDPAR));
 }
 
 static int _write_ptset(int conn_id, struct _VOIP_PTSET *opt)
 {
-	return _write_opts(conn_id, FC_VOIP_PTSET, (void *)opt);
+	return _write_opts(conn_id, FC_VOIP_PTSET, (void *)opt, sizeof(struct _VOIP_PTSET));
+}
+
+static int _write_autoswitch(int conn_id, struct _SET_PASSTHRU_AUTOSWITCH *opt)
+{
+	return _write_opts(conn_id, FC_SET_PASSTHRU_AUTOSWITCH, (void *)opt, sizeof(struct _SET_PASSTHRU_AUTOSWITCH));
 }
 
 
