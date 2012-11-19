@@ -78,8 +78,6 @@
 #define DAHDI_SWITCHT_EURO_ISDN_COD				0x1
 
 
-
-
 /*
  * General Structures
  */
