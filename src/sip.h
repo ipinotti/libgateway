@@ -43,18 +43,18 @@
 
 
 #define SIP_GENERAL_CONTENT	"[general]\n" \
-				"context=from-sip\n" \
-				"disallow=all\n" \
-				"srvlookup=yes\n" \
-				"bindaddr=0.0.0.0\n" \
-				"useragent=Parks AMG\n" \
-				"engine=comcerto\n"
+							"context=from-sip\n" \
+							"disallow=all\n" \
+							"srvlookup=yes\n" \
+							"bindaddr=0.0.0.0\n" \
+							"engine=comcerto\n"
 
-#define SIP_ACCOUNT_CONTENT	"\n[User1]\n" \
-				"#include sip_account_custom.conf\n" \
-				"type=friend\n"
+#define SIP_ACCOUNT_CONTENT	"#include sip_account_custom.conf\n" \
+							"type=friend\n"
 
 #define SIP_ACCOUNT_NAME "User1"
+
+#define SIP_TCP_BINDADDR "tcpbindaddr=0.0.0.0\n"
 
 /* Codecs */
 #define CODEC_G711_A 			"alaw"
@@ -84,9 +84,12 @@
 #define DTMF_MODE_SIP_INFO			"info"
 #define DTMF_MODE_SIP_INFO_COD		0x1
 
-#define ON_DEFAULT	1
-#define OFF_DEFAULT	0
+#define NUM_AVAILABLE_CODECS 9
+#define ON	1
+#define OFF	0
 #define TCP_UDP_ADDR_DEFAULT "0.0.0.0"
+#define TRANSPORT_TCP	"tcp"
+#define TRANSPORT_UDP	"udp"
 
 
 /*
@@ -102,9 +105,10 @@ struct libamg_sip_account {
 	char username[64];
 	char secret[64];
 	char host[64];
+	char transport[6];
 	unsigned short port;
 	char dtmfmode[32];
-	int allow[18];
+	int allow[NUM_AVAILABLE_CODECS];
 };
 
 struct libamg_sip_config {
@@ -122,6 +126,16 @@ struct libamg_sip_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_sip_get_codec_name
+ *
+ * Get SIP codec name by addressed code in spec.
+ *
+ * @param codec_code
+ * @return string
+ */
+char * libamg_sip_get_codec_name (int codec_code);
 
 /**
  * libamg_sip_parse_config

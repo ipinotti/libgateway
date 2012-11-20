@@ -107,7 +107,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		} else if (!strcmp(key, "jbmaxsize")) {
 			conf->jb_conf.jb_maxsize = atoi(value);
 		} else if (!strcmp(key, "jbimpl")) {
-			conf->jb_conf.jb_impl = !strcmp(value, "adaptative");
+			conf->jb_conf.jb_impl = !strcmp(value, "adaptive");
 		} else if (!strcmp(key, "jbmindelay")) {
 			conf->jb_conf.jb_mindelay = atoi(value);
 		} else if (!strcmp(key, "jbtypdelay")) {
@@ -117,6 +117,27 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		} else if (!strcmp(key, "jbdelet_thrld")) {
 			conf->jb_conf.jb_delet_thrld = atoi(value);
 		}
+				/* CODECS INTERVAL*/
+		else if (!strcmp(key, "codec_intvl_g711_a")) {
+			conf->codecs_intvl.g711_a = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g711_u")) {
+			conf->codecs_intvl.g711_a = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g723_1")) {
+			conf->codecs_intvl.g723_1 = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g726_16")) {
+			conf->codecs_intvl.g726_16 = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g726_24")) {
+			conf->codecs_intvl.g726_24 = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g726_32")) {
+			conf->codecs_intvl.g726_32 = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g726_40")) {
+			conf->codecs_intvl.g726_40 = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_g729")) {
+			conf->codecs_intvl.g729 = atoi(value);
+		} else if (!strcmp(key, "codec_intvl_gsm")) {
+			conf->codecs_intvl.gsm = atoi(value);
+		}
+
 	}
 
 	fclose(file);
@@ -151,7 +172,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	/* Jitter Buffer configs */
 	fprintf(file, "jbenable=%s\n", "yes"); /* ALWAYS ON FOR COMCERTO*/
 	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);
-	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptative" : "fixed");
+	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptive" : "fixed");
 	fprintf(file, "jbmindelay=%hd\n", conf->jb_conf.jb_mindelay);
 	fprintf(file, "jbtypdelay=%hd\n", conf->jb_conf.jb_typdelay);
 	fprintf(file, "jbmaxdelay=%hd\n", conf->jb_conf.jb_maxdelay);
@@ -159,6 +180,17 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	/* Tx/Rx Gain */
 	fprintf(file, "txgain=%hd\n",conf->txgain);
 	fprintf(file, "rxgain=%hd\n",conf->rxgain);
+
+	/* Codecs Intervals */
+	fprintf(file, "codec_intvl_g711_a=%hd\n",conf->codecs_intvl.g711_a);
+	fprintf(file, "codec_intvl_g711_u=%hd\n",conf->codecs_intvl.g711_u);
+	fprintf(file, "codec_intvl_g723_1=%hd\n",conf->codecs_intvl.g723_1);
+	fprintf(file, "codec_intvl_g726_16=%hd\n",conf->codecs_intvl.g726_16);
+	fprintf(file, "codec_intvl_g726_24=%hd\n",conf->codecs_intvl.g726_24);
+	fprintf(file, "codec_intvl_g726_32=%hd\n",conf->codecs_intvl.g726_32);
+	fprintf(file, "codec_intvl_g726_40=%hd\n",conf->codecs_intvl.g726_40);
+	fprintf(file, "codec_intvl_g729=%hd\n",conf->codecs_intvl.g729);
+	fprintf(file, "codec_intvl_gsm=%hd\n",conf->codecs_intvl.gsm);
 
 	fclose(file);
 

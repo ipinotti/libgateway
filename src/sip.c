@@ -40,6 +40,45 @@
 
 #define BUF_SIZE	256
 
+char * libamg_sip_get_codec_name(int codec_code)
+{
+	switch (codec_code) {
+		case CODEC_G711_A_COD:
+			return CODEC_G711_A;
+			break;
+		case CODEC_G711_U_COD:
+			return CODEC_G711_U;
+			break;
+		case CODEC_G723_1_COD:
+			return CODEC_G723_1;
+			break;
+		case CODEC_G726_16Kbps_COD:
+			return CODEC_G726_16Kbps;
+			break;
+		case CODEC_G726_24Kbps_COD:
+			return CODEC_G726_24Kbps;
+			break;
+		case CODEC_G726_32Kbps_COD:
+			return CODEC_G726_32Kbps;
+			break;
+		case CODEC_G726_40Kbps_COD:
+			return CODEC_G726_40Kbps;
+			break;
+		case CODEC_G729_COD:
+			return CODEC_G729;
+			break;
+		case CODEC_GSM_COD:
+			return CODEC_GSM;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
+
+}
+
 struct libamg_sip_config *libamg_sip_parse_config(void)
 {
 	FILE *file;
@@ -48,6 +87,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 	char *value;
 	struct libamg_sip_config *conf;
 	struct libamg_sip_account *account;
+	int pos_codecs = 0;
 
 	/* Alloc config struct */
 	conf = malloc(sizeof(struct libamg_sip_config));
@@ -85,7 +125,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "jbmaxsize")) {
 			conf->jb_conf.jb_maxsize = atoi(value);
 		} else if (!strcmp(key, "jbimpl")) {
-			conf->jb_conf.jb_impl = !strcmp(value, "adaptative");
+			conf->jb_conf.jb_impl = !strcmp(value, "adaptive");
 #ifdef NOT_YET_SUPPORTED
 		} else if (!strcmp(key, "jbmindelay")) {
 			conf->jb_conf.jb_mindelay = atoi(value);
@@ -96,9 +136,16 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "jbdelet_thrld")) {
 			conf->jb_conf.jb_delet_thrld = atoi(value);
 #endif
+		} else if (!strcmp(key, "tcpenable")) {
+			conf->tcpenable = !strcmp(value, "yes");
+		} else if (!strcmp(key, "defaultexpiry")) {
+			conf->defaultexpiry = atoi(value);
 		} else if (!strcmp(key, "register")) {
-			conf->register_enable = 1;
-			/* TODO get other parameters... */
+			conf->register_enable = ON;
+		} else if (!strcmp(key, ";reg_username")) {
+			strncpy(conf->register_username, value, 63);
+		} else if (!strcmp(key, ";reg_secret")) {
+			strncpy(conf->register_secret, value, 63);
 
 			/* Account confs*/
 		} else if (!strcmp(key, "host")) {
@@ -112,28 +159,31 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "dtmfmode")) {
 			strncpy(account->dtmfmode, value, 31);
 		}
-#ifdef ABANDONED
 		else if (!strcmp(key, "allow")) {
+			if (pos_codecs > NUM_AVAILABLE_CODECS)
+				continue;
+
 			if (!strcmp(value, CODEC_G711_A))
-				account->allow.g711_A = 1;
+				account->allow[pos_codecs] = CODEC_G711_A_COD;
 			else if (!strcmp(value, CODEC_G711_U))
-					account->allow.g711_U = 1;
+					account->allow[pos_codecs] = CODEC_G711_U_COD;
 			else if (!strcmp(value, CODEC_G723_1))
-					account->allow.g723_1 = 1;
+					account->allow[pos_codecs] = CODEC_G723_1_COD;
 			else if (!strcmp(value, CODEC_G726_16Kbps))
-					account->allow.g726_16kbps = 1;
+					account->allow[pos_codecs] = CODEC_G726_16Kbps_COD;
 			else if (!strcmp(value, CODEC_G726_24Kbps))
-					account->allow.g726_24kbps = 1;
+					account->allow[pos_codecs] = CODEC_G726_24Kbps_COD;
 			else if (!strcmp(value, CODEC_G726_32Kbps))
-					account->allow.g726_32kbps = 1;
+					account->allow[pos_codecs] = CODEC_G726_32Kbps_COD;
 			else if (!strcmp(value, CODEC_G726_40Kbps))
-					account->allow.g726_40kbps = 1;
+					account->allow[pos_codecs] = CODEC_G726_40Kbps_COD;
 			else if (!strcmp(value, CODEC_G729))
-					account->allow.g729 = 1;
+					account->allow[pos_codecs] = CODEC_G729_COD;
 			else if (!strcmp(value, CODEC_GSM))
-					account->allow.gsm = 1;
+					account->allow[pos_codecs] = CODEC_GSM_COD;
+
+			pos_codecs++;
 		}
-#endif
 		 else if (!strcmp(key, "nat")) {
 			account->nat = !strcmp(value, "yes");
 		} else if (!strcmp(key, "qualify")) {
@@ -144,6 +194,8 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 			strncpy(account->callerid, value, 63);
 		} else if (!strcmp(key, "fromuser")) {
 			strncpy(account->fromuser, value, 63);
+		} else if (!strcmp(key, "transport")) {
+			strncpy(account->transport, value, 5);
 		}
 	}
 
@@ -156,6 +208,7 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 {
 	FILE *file;
 	struct libamg_sip_account *account = &conf->accounts[0];
+	int pos_codec = 0;
 
 	/* Open SIP config file */
 	file = fopen(FILE_SIP_CONF, "w");
@@ -167,10 +220,23 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	/* Save SIP general default parameters */
 	fprintf(file, "%s", SIP_GENERAL_CONTENT);
 
+	/* Save SIP Useragent */
+	fprintf(file, "useragent=" PRODUCT_NAME "\n");
+
+	/* Save SIP bindport */
+	fprintf(file, "bindport=%hd\n", conf->bindport);
+
+	/* Save default expiry */
+	fprintf(file, "defaultexpiry=%hd\n", conf->defaultexpiry);
+
+	/* Save tcpenable */
+	fprintf(file, "tcpenable=%s\n", conf->tcpenable ? "yes" : "no");
+	fprintf(file, "%s", SIP_TCP_BINDADDR);
+
 	/* Jitter Buffer Confs (Same as Comcerto confs) */
 	fprintf(file, "jbenable=%s\n", "yes"); /* ALWAYS ON FOR COMCERTO*/
 	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);
-	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptative" : "fixed");
+	fprintf(file, "jbimpl=%s\n", conf->jb_conf.jb_impl ? "adaptive" : "fixed");
 #ifdef NOT_YET_SUPPORTED
 	fprintf(file, "jbmindelay=%hd\n", conf->jb_conf.jb_mindelay);
 	fprintf(file, "jbtypdelay=%hd\n", conf->jb_conf.jb_typdelay);
@@ -178,56 +244,41 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	fprintf(file, "jbdelet_thrld=%hd\n", conf->jb_conf.jb_delet_thrld);
 #endif
 
-	/* Save SIP Useragent */
-	fprintf(file, "useragent=" PRODUCT_NAME "\n");
-
-	/* Save SIP bindport */
-	fprintf(file, "bindport=%hd\n", conf->bindport);
-
-#ifdef NOT_SUPPORTED_AMG
 	/* Save SIP account registration */
-	if (account->register_enable) {
-		/* register=>user:pass@sip_host:sip_port */
-		fprintf(file, "register=>%s:%s@%s:%hd\n",
-				account->username, account->secret,
-				account->host, account->port);
+	fprintf(file, ";reg_username=%s\n", conf->register_username);
+	fprintf(file, ";reg_secret=%s\n", conf->register_secret);
+
+	if (conf->register_enable) {
+		/* register=>transport://user:pass@sip_host:sip_port/sip_account_name */
+		fprintf(file, "register=>%s://%s:%s@%s:%hd/%s\n",
+				account->transport, conf->register_username,
+				conf->register_secret, account->host,
+				account->port, SIP_ACCOUNT_NAME);
 	}
-	fprintf(file, "callerid=%s\n", account->callerid);
-	if (strlen(account->fromuser) > 0)
-		fprintf(file, "fromuser=%s\n", account->fromuser);
-	fprintf(file, "nat=%s\n", account->nat ? "yes" : "no");
-	fprintf(file, "qualify=%s\n", account->qualify ? "yes" : "no");
-	fprintf(file, "insecure=%s\n", account->insecure);
-#endif
 
 	/* Save SIP account parameters */
+	fprintf(file, "\n[%s]\n", SIP_ACCOUNT_NAME);
 	fprintf(file, "%s", SIP_ACCOUNT_CONTENT);
 	fprintf(file, "host=%s\n", account->host);
 	fprintf(file, "port=%hd\n", account->port);
 	fprintf(file, "username=%s\n", account->username);
 	fprintf(file, "secret=%s\n", account->secret);
 	fprintf(file, "dtmfmode=%s\n", account->dtmfmode);
+	fprintf(file, "callerid=%s\n", account->callerid);
+	if (strlen(account->fromuser) > 0)
+		fprintf(file, "fromuser=%s\n", account->fromuser);
+	fprintf(file, "nat=%s\n", account->nat ? "yes" : "no");
+	fprintf(file, "qualify=%s\n", account->qualify ? "yes" : "no");
+	fprintf(file, "insecure=%s\n", account->insecure);
+	fprintf(file, "transport=%s\n", account->transport);
 
-#ifdef ABANDONED
-	if (account->allow.g711_A)
-		fprintf(file, "allow=%s\n", CODEC_G711_A);
-	if (account->allow.g711_U)
-		fprintf(file, "allow=%s\n", CODEC_G711_U);
-	if (account->allow.g723_1)
-		fprintf(file, "allow=%s\n", CODEC_G723_1);
-	if (account->allow.g726_16kbps)
-		fprintf(file, "allow=%s\n", CODEC_G726_16Kbps);
-	if (account->allow.g726_24kbps)
-		fprintf(file, "allow=%s\n", CODEC_G726_24Kbps);
-	if (account->allow.g726_32kbps)
-		fprintf(file, "allow=%s\n", CODEC_G726_32Kbps);
-	if (account->allow.g726_40kbps)
-		fprintf(file, "allow=%s\n", CODEC_G726_40Kbps);
-	if (account->allow.g729)
-		fprintf(file, "allow=%s\n", CODEC_G729);
-	if (account->allow.gsm)
-		fprintf(file, "allow=%s\n", CODEC_GSM);
-#endif
+	/* Save SIP Codecs */
+	for (pos_codec = 0; pos_codec < NUM_AVAILABLE_CODECS; ++pos_codec) {
+		if (account->allow[pos_codec] <= 0)
+			continue;
+
+		fprintf(file, "allow=%s\n", libamg_sip_get_codec_name(account->allow[pos_codec]));
+	}
 
 	fclose(file);
 

@@ -108,6 +108,8 @@ char * libamg_dahdi_get_switchtype_name(int switchtype_code)
 			return NULL;
 			break;
 	}
+
+	return 0;
 }
 
 struct libamg_dahdi_status *libamg_dahdi_get_status(void)

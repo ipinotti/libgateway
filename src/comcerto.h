@@ -90,6 +90,19 @@
  * General Structures
  */
 
+/* Codecs Interval used in SIP_conf and Comcerto_conf*/
+typedef struct libamg_codecs_intvl {
+	int g711_a;
+	int g711_u;
+	int g723_1;
+	int g726_16;
+	int g726_24;
+	int g726_32;
+	int g726_40;
+	int g729;
+	int gsm;
+} libamg_codecs_intvl;
+
 /* Jitter Buffer Config used in SIP_conf and Comcerto_conf*/
 typedef struct libamg_jb_config {
 	int jb_enable;
@@ -113,7 +126,9 @@ struct libamg_comcerto_config {
 	int e1_enable;
 	int e1_loopback_enable;
 	libamg_jb_config jb_conf;
+	libamg_codecs_intvl codecs_intvl;
 };
+
 
 /*
  * Functions Declaration
