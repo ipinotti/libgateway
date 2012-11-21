@@ -41,7 +41,7 @@
 
 #define BUF_SIZE 128
 
-int libamg_comcerto_rtp_reset_config(void)
+int libamg_comcerto_reset_config(void)
 {
 	char command[BUF_SIZE];
 

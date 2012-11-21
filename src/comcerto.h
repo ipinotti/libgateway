@@ -138,11 +138,11 @@ struct libamg_comcerto_config {
 /**
  * libamg_comcerto_rtp_reset_config
  *
- * Restore the RTP TDM configures from default comcerto configuration file
+ * Restore the TDM configures from default comcerto configuration file
  *
  * @return 0 if success, negative if error
  */
-int libamg_comcerto_rtp_reset_config(void);
+int libamg_comcerto_reset_config(void);
 
 /**
  * libamg_comcerto_rtp_reload
