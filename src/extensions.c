@@ -39,6 +39,16 @@
 
 #define BUF_SIZE	256
 
+int libamg_extensions_reset_config(void)
+{
+	char command[BUF_SIZE];
+
+	memset(command, 0, sizeof(command));
+	snprintf(command, sizeof(command), "cp %s%s %s", FILE_EXTENSIONS_CONF_DEFAULT_PATH, FILE_EXTENSIONS_CONF_NAME, FILE_EXTENSIONS_CONF_PATH);
+
+	return system(command);
+}
+
 struct libamg_extensions_config *libamg_extensions_parse_config(void)
 {
 	FILE *file;

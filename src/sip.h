@@ -35,7 +35,12 @@
 /*
  * General Defines
  */
-#define FILE_SIP_CONF		"/etc/asterisk/sip.conf"
+
+#define FILE_SIP_CONF_NAME			"sip.conf"
+#define FILE_SIP_CONF_PATH			"/etc/asterisk/"
+#define FILE_SIP_CONF				FILE_SIP_CONF_PATH FILE_SIP_CONF_NAME
+#define FILE_SIP_CONF_DEFAULT_PATH	"/etc.ro/asterisk/"
+
 
 #define PRODUCT_NAME	"Parks-AMG"
 
@@ -126,6 +131,15 @@ struct libamg_sip_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_sip_reset_config
+ *
+ * Restore the SIP configures from default sip configuration file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_sip_reset_config(void);
 
 /**
  * libamg_sip_get_codec_name

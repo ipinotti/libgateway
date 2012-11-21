@@ -67,7 +67,7 @@
 	Jitter Buffer Configs (Comcerto e Sip)
 	Ativado			=>	jb_enable=yes
 	Tamanho maximo do Jitter Buffer em "ms"		=>	jb_maxsize=num
-	Implementacao do Jitter buffer [fixed = 0 / adaptative = 1]		=>	jb_impl=fixed
+	Implementacao do Jitter buffer [fixed = 0 / adaptive = 1]		=>	jb_impl=fixed
 
 	Jitter Buffer (Comcerto)
 	Min Delay (0-200ms)				=>	jb_mindelay=num
@@ -80,10 +80,11 @@
 /*
  * General Defines
  */
-#define FILE_COMCERTO_CONF		"/etc/asterisk/comcerto.conf"
 
-#define ON_DEFAULT	1
-#define OFF_DEFAULT	0
+#define FILE_COMCERTO_CONF_NAME			"comcerto.conf"
+#define FILE_COMCERTO_CONF_PATH			"/etc/asterisk/"
+#define FILE_COMCERTO_CONF				FILE_COMCERTO_CONF_PATH FILE_COMCERTO_CONF_NAME
+#define FILE_CONCERTO_CONF_DEFAULT_PATH	"/etc.ro/asterisk/"
 
 
 /*
@@ -133,6 +134,15 @@ struct libamg_comcerto_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_comcerto_rtp_reset_config
+ *
+ * Restore the RTP TDM configures from default comcerto configuration file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_comcerto_rtp_reset_config(void);
 
 /**
  * libamg_comcerto_rtp_reload

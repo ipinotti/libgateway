@@ -36,8 +36,15 @@
  * General Defines
  */
 
-#define FILE_DAHDI_SYSTEM_CONF	"/etc/dahdi/system.conf"
-#define FILE_CHAN_DAHDI_CONF	"/etc/asterisk/chan_dahdi.conf"
+#define FILE_DAHDI_SYSTEM_CONF_NAME	"system.conf"
+#define FILE_DAHDI_SYSTEM_CONF_PATH "/etc/dahdi/"
+#define FILE_DAHDI_SYSTEM_CONF_DEFAULT_PATH "/etc.ro/dahdi/"
+#define FILE_CHAN_DAHDI_CONF_NAME	"chan_dahdi.conf"
+#define FILE_CHAN_DAHDI_CONF_PATH "/etc/asterisk/"
+#define FILE_CHAN_DAHDI_CONF_DEFAULT_PATH "/etc.ro/asterisk/"
+
+#define FILE_DAHDI_SYSTEM_CONF	FILE_DAHDI_SYSTEM_CONF_PATH FILE_DAHDI_SYSTEM_CONF_NAME
+#define FILE_CHAN_DAHDI_CONF	FILE_CHAN_DAHDI_CONF_PATH FILE_CHAN_DAHDI_CONF_NAME
 #define FILE_DAHDI_IOCTL	"/dev/dahdi/ctl"
 #define FILE_AISDAEMON_CONF	"/etc/dahdi/aisdaemon.conf"
 
@@ -128,6 +135,15 @@ struct libamg_dahdi_status {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_dahdi_reset_config
+ *
+ * Restore the dahdi configures from default dahdi configuration file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_dahdi_reset_config(void);
 
 /**
  * libamg_dahdi_get_switchtype_name

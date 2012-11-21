@@ -35,7 +35,11 @@
 /*
  * General Defines
  */
-#define FILE_EXTENSIONS_CONF		"/etc/asterisk/extensions.conf"
+
+#define FILE_EXTENSIONS_CONF_NAME			"extensions.conf"
+#define FILE_EXTENSIONS_CONF_PATH			"/etc/asterisk/"
+#define FILE_EXTENSIONS_CONF				FILE_EXTENSIONS_CONF_PATH FILE_EXTENSIONS_CONF_NAME
+#define FILE_EXTENSIONS_CONF_DEFAULT_PATH	"/etc.ro/asterisk/"
 
 #define PRODUCT_NAME	"Parks-AMG"
 
@@ -78,6 +82,15 @@ struct libamg_extensions_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_extensions_reset_config
+ *
+ * Restore the extensions configures from default extensions configuration file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_extensions_reset_config(void);
 
 /**
  * libamg_extensions_parse_config

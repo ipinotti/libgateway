@@ -40,6 +40,16 @@
 
 #define BUF_SIZE	256
 
+int libamg_sip_reset_config(void)
+{
+	char command[BUF_SIZE];
+
+	memset(command, 0, sizeof(command));
+	snprintf(command, sizeof(command), "cp %s%s %s", FILE_SIP_CONF_DEFAULT_PATH, FILE_SIP_CONF_NAME, FILE_SIP_CONF_PATH);
+
+	return system(command);
+}
+
 char * libamg_sip_get_codec_name(int codec_code)
 {
 	switch (codec_code) {
@@ -158,8 +168,19 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 			strncpy(account->secret, value, 63);
 		} else if (!strcmp(key, "dtmfmode")) {
 			strncpy(account->dtmfmode, value, 31);
-		}
-		else if (!strcmp(key, "allow")) {
+		} else if (!strcmp(key, "nat")) {
+			account->nat = !strcmp(value, "yes");
+		} else if (!strcmp(key, "qualify")) {
+			account->qualify = !strcmp(value, "yes");
+		} else if (!strcmp(key, "insecure")) {
+			strncpy(account->insecure, value, 31);
+		} else if (!strcmp(key, "callerid")) {
+			strncpy(account->callerid, value, 63);
+		} else if (!strcmp(key, "fromuser")) {
+			strncpy(account->fromuser, value, 63);
+		} else if (!strcmp(key, "transport")) {
+			strncpy(account->transport, value, 5);
+		} else if (!strcmp(key, "allow")) {
 			if (pos_codecs > NUM_AVAILABLE_CODECS)
 				continue;
 
@@ -183,19 +204,6 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 					account->allow[pos_codecs] = CODEC_GSM_COD;
 
 			pos_codecs++;
-		}
-		 else if (!strcmp(key, "nat")) {
-			account->nat = !strcmp(value, "yes");
-		} else if (!strcmp(key, "qualify")) {
-			account->qualify = !strcmp(value, "yes");
-		} else if (!strcmp(key, "insecure")) {
-			strncpy(account->insecure, value, 31);
-		} else if (!strcmp(key, "callerid")) {
-			strncpy(account->callerid, value, 63);
-		} else if (!strcmp(key, "fromuser")) {
-			strncpy(account->fromuser, value, 63);
-		} else if (!strcmp(key, "transport")) {
-			strncpy(account->transport, value, 5);
 		}
 	}
 

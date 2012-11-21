@@ -41,6 +41,22 @@
 #include "log.h"
 #include "str.h"
 
+int libamg_dahdi_reset_config(void)
+{
+	char command[BUF_SIZE];
+
+	memset(command, 0, sizeof(command));
+	snprintf(command, sizeof(command), "cp %s%s %s", FILE_DAHDI_SYSTEM_CONF_DEFAULT_PATH, FILE_DAHDI_SYSTEM_CONF_NAME, FILE_DAHDI_SYSTEM_CONF_PATH);
+	if (system (command) < 0)
+		return -1;
+
+	memset(command, 0, sizeof(command));
+	snprintf(command, sizeof(command), "cp %s%s %s", FILE_CHAN_DAHDI_CONF_DEFAULT_PATH, FILE_CHAN_DAHDI_CONF_NAME, FILE_CHAN_DAHDI_CONF_PATH);
+
+	return system(command);
+}
+
+
 static int libamg_dahdi_indirect_ioctl(int span, int cmd, void *data)
 {
 	struct dahdi_indirect_data ind;

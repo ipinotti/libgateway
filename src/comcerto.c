@@ -41,6 +41,16 @@
 
 #define BUF_SIZE 128
 
+int libamg_comcerto_rtp_reset_config(void)
+{
+	char command[BUF_SIZE];
+
+	memset(command, 0, sizeof(command));
+	snprintf(command, sizeof(command), "cp %s%s %s", FILE_CONCERTO_CONF_DEFAULT_PATH, FILE_COMCERTO_CONF_NAME, FILE_COMCERTO_CONF_PATH);
+
+	return system(command);
+}
+
 int libamg_comcerto_rtp_reload(void)
 {
 	return system("asterisk -rx \"module reload librtp-comcerto\"");
@@ -63,7 +73,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 	memset(conf, 0, sizeof(struct libamg_comcerto_config));
 
 	/* Open Comcerto config file */
-	file = fopen(FILE_COMCERTO_CONF, "r");
+	file = fopen(FILE_COMCERTO_CONF_PATH, "r");
 	if (file == NULL) {
 		libamg_log_error("Error opening file\n");
 		return NULL;
@@ -151,7 +161,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	struct libamg_sip_config * sip_conf;
 
 	/* Open Comcerto config file */
-	file = fopen(FILE_COMCERTO_CONF, "w");
+	file = fopen(FILE_COMCERTO_CONF_PATH, "w");
 	if (file == NULL) {
 		libamg_log_error("Error opening file\n");
 		return -1;
