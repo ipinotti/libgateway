@@ -63,7 +63,7 @@
 
 /* Codecs */
 #define CODEC_G711_A 			"alaw"
-#define CODEC_G711_A_COD		0x100
+#define CODEC_G711_A_COD		0xFF
 #define CODEC_G711_U 			"ulaw"
 #define CODEC_G711_U_COD		0x80
 #define CODEC_G723_1 			"g723"
@@ -140,6 +140,16 @@ struct libamg_sip_config {
  * @return 0 if success, negative if error
  */
 int libamg_sip_reset_config(void);
+
+/**
+ * libamg_sip_get_dtmfmode_name
+ *
+ * Get SIP dtmf_mode name by addressed code in spec.
+ *
+ * @param dtmfmode_code
+ * @return string
+ */
+char * libamg_sip_get_dtmfmode_name (int dtmfmode_code);
 
 /**
  * libamg_sip_get_codec_name

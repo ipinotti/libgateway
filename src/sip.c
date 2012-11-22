@@ -50,6 +50,26 @@ int libamg_sip_reset_config(void)
 	return system(command);
 }
 
+char * libamg_sip_get_dtmfmode_name(int dtmfmode_code)
+{
+	switch (dtmfmode_code) {
+		case DTMF_MODE_IN_BAND_COD:
+			return DTMF_MODE_IN_BAND;
+			break;
+		case DTMF_MODE_RFC2833_COD:
+			return DTMF_MODE_RFC2833;
+			break;
+		case DTMF_MODE_SIP_INFO_COD:
+			return DTMF_MODE_SIP_INFO;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
+}
+
 char * libamg_sip_get_codec_name(int codec_code)
 {
 	switch (codec_code) {

@@ -91,7 +91,9 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		strtok(value, " \t\n;#");
 
 		/* Parse parameters */
-		if (!strcmp(key, "ais_enable")) {
+		if (!strcmp(key, "codec_g723_1")) {
+			conf->ais_enable = !strcmp(value, "6.3kbps");
+		} else if (!strcmp(key, "ais_enable")) {
 			conf->ais_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "vad_enable")) {
 			conf->vad_enable = !strcmp(value, "yes");
@@ -190,6 +192,8 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	/* Tx/Rx Gain */
 	fprintf(file, "txgain=%hd\n",conf->txgain);
 	fprintf(file, "rxgain=%hd\n",conf->rxgain);
+	/* G723.1 codec config */
+	fprintf(file, "codec_g723_1=%s\n", conf->codec_g723_1 ? "6.3kbps" : "5.3kbps");
 
 	/* Codecs Intervals */
 	fprintf(file, "codec_intvl_g711_a=%hd\n",conf->codecs_intvl.g711_a);
