@@ -156,6 +156,14 @@ int libamg_dahdi_reset_config(void);
 char * libamg_dahdi_get_switchtype_name (int switchtype_code);
 
 /**
+ * Get ISDN switchtype code according to given name
+ *
+ * @param switchtype_name
+ * @return Code if success, -1 if error
+ */
+int libamg_dahdi_get_switchtype_code(const char *switchtype_name);
+
+/**
  * libamg_dahdi_get_status
  *
  * Get Dahdi system status.

@@ -128,6 +128,26 @@ char * libamg_dahdi_get_switchtype_name(int switchtype_code)
 	return 0;
 }
 
+int libamg_dahdi_get_switchtype_code(const char *switchtype_name)
+{
+	if (!strcmp(switchtype_name, DAHDI_SWITCHT_EURO_ISDN_NAME))
+		return DAHDI_SWITCHT_EURO_ISDN_COD;
+	else if (!strcmp(switchtype_name, DAHDI_SWITCHT_NATIONAL_ISDN2_NAME))
+		return DAHDI_SWITCHT_NATIONAL_ISDN2_COD;
+	else if (!strcmp(switchtype_name, DAHDI_SWITCHT_NORTEL_DMS100_NAME))
+		return DAHDI_SWITCHT_NORTEL_DMS100_COD;
+	else if (!strcmp(switchtype_name, DAHDI_SWITCHT_ATeT_4ESS_NAME))
+		return DAHDI_SWITCHT_ATeT_4ESS_COD;
+	else if (!strcmp(switchtype_name, DAHDI_SWITCHT_LUCENT_5ESS_NAME))
+		return DAHDI_SWITCHT_LUCENT_5ESS_COD;
+	else if (!strcmp(switchtype_name, DAHDI_SWITCHT_NATIONAL_ISDN_1_NAME))
+		return DAHDI_SWITCHT_NATIONAL_ISDN_1_COD;
+	else if (!strcmp(switchtype_name, DAHDI_SWITCHT_Q_SIG_NAME))
+		return DAHDI_SWITCHT_Q_SIG_COD;
+	else
+		return -1;
+}
+
 struct libamg_dahdi_status *libamg_dahdi_get_status(void)
 {
 	struct libamg_dahdi_status *status;
@@ -259,9 +279,9 @@ int _parse_chan_dahdi_channel_line(struct libamg_dahdi_config *conf,
 	} else if (res == 2) {
 		span->channels = a - first + 1;
 	} else if (res == 3) {
-		span->channels = b - first + 1;
+		span->channels = b - first;
 	} else if (res == 4) {
-		span->channels = c - first + 1;
+		span->channels = c - first;
 	} else {
 		return -1;
 	}
