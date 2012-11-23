@@ -199,7 +199,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "fromuser")) {
 			strncpy(account->fromuser, value, 63);
 		} else if (!strcmp(key, "transport")) {
-			strncpy(account->transport, value, 5);
+			strncpy(account->transport, value, 7);
 		} else if (!strcmp(key, "allow")) {
 			if (pos_codecs > NUM_AVAILABLE_CODECS)
 				continue;

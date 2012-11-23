@@ -63,7 +63,7 @@
 
 /* Codecs */
 #define CODEC_G711_A 			"alaw"
-#define CODEC_G711_A_COD		0xFF
+#define CODEC_G711_A_COD		0x100
 #define CODEC_G711_U 			"ulaw"
 #define CODEC_G711_U_COD		0x80
 #define CODEC_G723_1 			"g723"
@@ -110,7 +110,7 @@ struct libamg_sip_account {
 	char username[64];
 	char secret[64];
 	char host[64];
-	char transport[6];
+	char transport[8];
 	unsigned short port;
 	char dtmfmode[32];
 	int allow[NUM_AVAILABLE_CODECS];
