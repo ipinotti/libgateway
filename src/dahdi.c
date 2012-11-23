@@ -173,7 +173,7 @@ struct libamg_dahdi_status *libamg_dahdi_get_status(void)
 	return status;
 }
 
-void libamg_dahdi_reset_stats(void)
+void libamg_dahdi_reset_status(void)
 {
 	int i;
 
