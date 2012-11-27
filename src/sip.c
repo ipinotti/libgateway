@@ -50,17 +50,24 @@ int libamg_sip_reset_config(void)
 	return system(command);
 }
 
-char * libamg_sip_get_dtmfmode_name(int dtmfmode_code)
+int libamg_sip_get_session_timers_refresher_code(const char *session_timers_refresher_name)
 {
-	switch (dtmfmode_code) {
-		case DTMF_MODE_IN_BAND_COD:
-			return DTMF_MODE_IN_BAND;
+	if (!strcmp(session_timers_refresher_name, SESSION_TIMERS_REFRESHER_MODE_UAC_NAME))
+		return SESSION_TIMERS_REFRESHER_MODE_UAC_COD;
+	else if (!strcmp(session_timers_refresher_name, SESSION_TIMERS_REFRESHER_MODE_UAS_NAME))
+		return SESSION_TIMERS_REFRESHER_MODE_UAS_COD;
+	else
+		return SESSION_TIMERS_REFRESHER_MODE_OFF_COD;
+}
+
+char * libamg_sip_get_session_timers_refresher_name(int session_timers_refresher_code)
+{
+	switch (session_timers_refresher_code) {
+		case SESSION_TIMERS_REFRESHER_MODE_UAC_COD:
+			return SESSION_TIMERS_REFRESHER_MODE_UAC_NAME;
 			break;
-		case DTMF_MODE_RFC2833_COD:
-			return DTMF_MODE_RFC2833;
-			break;
-		case DTMF_MODE_SIP_INFO_COD:
-			return DTMF_MODE_SIP_INFO;
+		case SESSION_TIMERS_REFRESHER_MODE_UAS_COD:
+			return SESSION_TIMERS_REFRESHER_MODE_UAS_NAME;
 			break;
 		default:
 			return NULL;
@@ -70,35 +77,29 @@ char * libamg_sip_get_dtmfmode_name(int dtmfmode_code)
 	return 0;
 }
 
-char * libamg_sip_get_codec_name(int codec_code)
+int libamg_sip_get_session_timers_code(const char *session_timers_name)
 {
-	switch (codec_code) {
-		case CODEC_G711_A_COD:
-			return CODEC_G711_A;
+	if (!strcmp(session_timers_name, SESSION_TIMERS_MODE_ORIG_NAME))
+		return SESSION_TIMERS_MODE_ORIG_COD;
+	else if (!strcmp(session_timers_name, SESSION_TIMERS_MODE_REF_NAME))
+		return SESSION_TIMERS_MODE_REF_COD;
+	else if (!strcmp(session_timers_name, SESSION_TIMERS_MODE_ACC_NAME))
+			return SESSION_TIMERS_MODE_ACC_COD;
+	else
+		return SESSION_TIMERS_MODE_OFF_COD;
+}
+
+char * libamg_sip_get_session_timers_name(int session_timers_code)
+{
+	switch (session_timers_code) {
+		case SESSION_TIMERS_MODE_ORIG_COD:
+			return SESSION_TIMERS_MODE_ORIG_NAME;
 			break;
-		case CODEC_G711_U_COD:
-			return CODEC_G711_U;
+		case SESSION_TIMERS_MODE_REF_COD:
+			return SESSION_TIMERS_MODE_REF_NAME;
 			break;
-		case CODEC_G723_1_COD:
-			return CODEC_G723_1;
-			break;
-		case CODEC_G726_16Kbps_COD:
-			return CODEC_G726_16Kbps;
-			break;
-		case CODEC_G726_24Kbps_COD:
-			return CODEC_G726_24Kbps;
-			break;
-		case CODEC_G726_32Kbps_COD:
-			return CODEC_G726_32Kbps;
-			break;
-		case CODEC_G726_40Kbps_COD:
-			return CODEC_G726_40Kbps;
-			break;
-		case CODEC_G729_COD:
-			return CODEC_G729;
-			break;
-		case CODEC_GSM_COD:
-			return CODEC_GSM;
+		case SESSION_TIMERS_MODE_ACC_COD:
+			return SESSION_TIMERS_MODE_ACC_NAME;
 			break;
 		default:
 			return NULL;
@@ -106,7 +107,169 @@ char * libamg_sip_get_codec_name(int codec_code)
 	}
 
 	return 0;
+}
 
+int libamg_sip_get_transport_code(const char *transport_name)
+{
+	if (!strcmp(transport_name, TRANSPORT_MODE_TCP_NAME))
+		return TRANSPORT_MODE_TCP_COD;
+	else if (!strcmp(transport_name, TRANSPORT_MODE_UDP_NAME))
+		return TRANSPORT_MODE_UDP_COD;
+	else
+		return -1;
+}
+
+char * libamg_sip_get_transport_name(int transport_code)
+{
+	switch (transport_code) {
+		case TRANSPORT_MODE_UDP_COD:
+			return TRANSPORT_MODE_UDP_NAME;
+			break;
+		case TRANSPORT_MODE_TCP_COD:
+			return TRANSPORT_MODE_TCP_NAME;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
+}
+
+int libamg_sip_get_insecure_code(const char *insecure_name)
+{
+	if (!strcmp(insecure_name, INSECURE_MODE_VERY_NAME))
+		return INSECURE_MODE_VERY_COD;
+	else if (!strcmp(insecure_name, INSECURE_MODE_PORT_NAME))
+		return INSECURE_MODE_PORT_COD;
+	else if (!strcmp(insecure_name, INSECURE_MODE_INVITE_NAME))
+		return INSECURE_MODE_INVITE_COD;
+	else if (!strcmp(insecure_name, INSECURE_MODE_PORT_INVITE_NAME))
+		return INSECURE_MODE_PORT_INVITE_COD;
+	else if (!strcmp(insecure_name, INSECURE_MODE_NO_NAME))
+		return INSECURE_MODE_NO_COD;
+	else
+		return -1;
+}
+
+char * libamg_sip_get_insecure_name(int insecure_code)
+{
+	switch (insecure_code) {
+		case INSECURE_MODE_VERY_COD:
+			return INSECURE_MODE_VERY_NAME;
+			break;
+		case INSECURE_MODE_PORT_COD:
+			return INSECURE_MODE_PORT_NAME;
+			break;
+		case INSECURE_MODE_INVITE_COD:
+			return INSECURE_MODE_INVITE_NAME;
+			break;
+		case INSECURE_MODE_PORT_INVITE_COD:
+			return INSECURE_MODE_PORT_INVITE_NAME;
+			break;
+		case INSECURE_MODE_NO_COD:
+			return INSECURE_MODE_NO_NAME;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
+}
+
+int libamg_sip_get_dtmfmode_code(const char *dtmfmode_name)
+{
+	if (!strcmp(dtmfmode_name, DTMF_MODE_IN_BAND_NAME))
+		return DTMF_MODE_IN_BAND_COD;
+	else if (!strcmp(dtmfmode_name, DTMF_MODE_RFC2833_NAME))
+		return DTMF_MODE_RFC2833_COD;
+	else if (!strcmp(dtmfmode_name, DTMF_MODE_SIP_INFO_NAME))
+		return DTMF_MODE_SIP_INFO_COD;
+	else
+		return -1;
+}
+
+char * libamg_sip_get_dtmfmode_name(int dtmfmode_code)
+{
+	switch (dtmfmode_code) {
+		case DTMF_MODE_IN_BAND_COD:
+			return DTMF_MODE_IN_BAND_NAME;
+			break;
+		case DTMF_MODE_RFC2833_COD:
+			return DTMF_MODE_RFC2833_NAME;
+			break;
+		case DTMF_MODE_SIP_INFO_COD:
+			return DTMF_MODE_SIP_INFO_NAME;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
+}
+
+int libamg_sip_get_codec_code(const char *codec_name)
+{
+	if (!strcmp(codec_name, CODEC_G711_A_NAME))
+		return CODEC_G711_A_COD;
+	else if (!strcmp(codec_name, CODEC_G711_U_NAME))
+		return CODEC_G711_U_COD;
+	else if (!strcmp(codec_name, CODEC_G723_1_NAME))
+		return CODEC_G723_1_COD;
+	else if (!strcmp(codec_name, CODEC_G726_16Kbps_NAME))
+		return CODEC_G726_16Kbps_COD;
+	else if (!strcmp(codec_name, CODEC_G726_24Kbps_NAME))
+		return CODEC_G726_24Kbps_COD;
+	else if (!strcmp(codec_name, CODEC_G726_32Kbps_NAME))
+		return CODEC_G726_32Kbps_COD;
+	else if (!strcmp(codec_name, CODEC_G726_40Kbps_NAME))
+		return CODEC_G726_40Kbps_COD;
+	else if (!strcmp(codec_name, CODEC_G729_NAME))
+		return CODEC_G729_COD;
+	else if (!strcmp(codec_name, CODEC_GSM_NAME))
+		return CODEC_GSM_COD;
+	else
+		return -1;
+}
+
+char * libamg_sip_get_codec_name(int codec_code)
+{
+	switch (codec_code) {
+		case CODEC_G711_A_COD:
+			return CODEC_G711_A_NAME;
+			break;
+		case CODEC_G711_U_COD:
+			return CODEC_G711_U_NAME;
+			break;
+		case CODEC_G723_1_COD:
+			return CODEC_G723_1_NAME;
+			break;
+		case CODEC_G726_16Kbps_COD:
+			return CODEC_G726_16Kbps_NAME;
+			break;
+		case CODEC_G726_24Kbps_COD:
+			return CODEC_G726_24Kbps_NAME;
+			break;
+		case CODEC_G726_32Kbps_COD:
+			return CODEC_G726_32Kbps_NAME;
+			break;
+		case CODEC_G726_40Kbps_COD:
+			return CODEC_G726_40Kbps_NAME;
+			break;
+		case CODEC_G729_COD:
+			return CODEC_G729_NAME;
+			break;
+		case CODEC_GSM_COD:
+			return CODEC_GSM_NAME;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
 }
 
 struct libamg_sip_config *libamg_sip_parse_config(void)
@@ -150,6 +313,10 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 			/* General confs */
 		if (!strcmp(key, "bindport")) {
 			conf->bindport = atoi(value);
+		} else if (!strcmp(key, "defaultexpiry")) {
+			conf->defaultexpiry = atoi(value);
+		} else if (!strcmp(key, "tcpenable")) {
+			conf->tcpenable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "jbenable")) {
 			conf->jb_conf.jb_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "jbmaxsize")) {
@@ -166,10 +333,26 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "jbdelet_thrld")) {
 			conf->jb_conf.jb_delet_thrld = atoi(value);
 #endif
-		} else if (!strcmp(key, "tcpenable")) {
-			conf->tcpenable = !strcmp(value, "yes");
-		} else if (!strcmp(key, "defaultexpiry")) {
+		} else if (!strcmp(key, "t1min")) {
+			conf->t1min = atoi(value);
+		} else if (!strcmp(key, "timert1")) {
+			conf->timert1 = atoi(value);
+		} else if (!strcmp(key, "timerb")) {
+			conf->timerb = atoi(value);
+		} else if (!strcmp(key, "rtptimeout")) {
+			conf->rtptimeout = atoi(value);
+		} else if (!strcmp(key, "rtpholdtimeout")) {
+			conf->rtpholdtimeout = atoi(value);
+		} else if (!strcmp(key, "rtpkeepalive")) {
+			conf->rtpkeepalive = atoi(value);
+		} else if (!strcmp(key, "session-timers")) {
+			strncpy(conf->session_timers, value, 16);
+		} else if (!strcmp(key, "session-expires")) {
 			conf->defaultexpiry = atoi(value);
+		} else if (!strcmp(key, "session-minse")) {
+			conf->defaultexpiry = atoi(value);
+		} else if (!strcmp(key, "session-refresher")) {
+			strncpy(conf->session_refresher, value, 8);
 		} else if (!strcmp(key, "register")) {
 			conf->register_enable = ON;
 		} else if (!strcmp(key, ";reg_username")) {
@@ -204,25 +387,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 			if (pos_codecs > NUM_AVAILABLE_CODECS)
 				continue;
 
-			if (!strcmp(value, CODEC_G711_A))
-				account->allow[pos_codecs] = CODEC_G711_A_COD;
-			else if (!strcmp(value, CODEC_G711_U))
-					account->allow[pos_codecs] = CODEC_G711_U_COD;
-			else if (!strcmp(value, CODEC_G723_1))
-					account->allow[pos_codecs] = CODEC_G723_1_COD;
-			else if (!strcmp(value, CODEC_G726_16Kbps))
-					account->allow[pos_codecs] = CODEC_G726_16Kbps_COD;
-			else if (!strcmp(value, CODEC_G726_24Kbps))
-					account->allow[pos_codecs] = CODEC_G726_24Kbps_COD;
-			else if (!strcmp(value, CODEC_G726_32Kbps))
-					account->allow[pos_codecs] = CODEC_G726_32Kbps_COD;
-			else if (!strcmp(value, CODEC_G726_40Kbps))
-					account->allow[pos_codecs] = CODEC_G726_40Kbps_COD;
-			else if (!strcmp(value, CODEC_G729))
-					account->allow[pos_codecs] = CODEC_G729_COD;
-			else if (!strcmp(value, CODEC_GSM))
-					account->allow[pos_codecs] = CODEC_GSM_COD;
-
+			account->allow[pos_codecs] = libamg_sip_get_codec_code(value);
 			pos_codecs++;
 		}
 	}
@@ -271,6 +436,28 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	fprintf(file, "jbmaxdelay=%hd\n", conf->jb_conf.jb_maxdelay);
 	fprintf(file, "jbdelet_thrld=%hd\n", conf->jb_conf.jb_delet_thrld);
 #endif
+
+	/* Save SIP timers*/
+	if (conf->t1min)
+		fprintf(file, "t1min=%hd\n", conf->t1min);
+	if (conf->timert1)
+		fprintf(file, "timert1=%hd\n", conf->timert1);
+	if (conf->timerb)
+		fprintf(file, "timerb=%hd\n", conf->timerb);
+	if (conf->rtptimeout)
+		fprintf(file, "rtptimeout=%hd\n", conf->rtptimeout);
+	if (conf->rtpholdtimeout)
+		fprintf(file, "rtpholdtimeout=%hd\n", conf->rtpholdtimeout);
+	if (conf->rtpkeepalive)
+		fprintf(file, "rtpkeepalive=%hd\n", conf->rtpkeepalive);
+	if (conf->session_timers)
+		fprintf(file, "session-timers=%s\n", conf->session_timers);
+	if (conf->session_expires)
+		fprintf(file, "session-expires=%hd\n", conf->session_expires);
+	if (conf->session_minse)
+		fprintf(file, "session-minse=%hd\n", conf->session_minse);
+	if (conf->session_refresher)
+		fprintf(file, "session-refresher=%s\n", conf->session_refresher);
 
 	/* Save SIP account registration */
 	fprintf(file, ";reg_username=%s\n", conf->register_username);
