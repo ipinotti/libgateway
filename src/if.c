@@ -220,6 +220,8 @@ int libamg_get_default_gw_ipaddr(struct in_addr *ip)
 {
 	struct rtnl_handle rth;
 
+	memset(ip, 0, sizeof(struct in_addr));
+
 	if (rtnl_open(&rth, 0) < 0) {
 		perror("rtnl_open");
 		return -1;
@@ -438,6 +440,8 @@ int libamg_get_interface_ipv4_addr(char *iface, struct in_addr *addr)
 {
 	struct ifreq req;
 
+	memset(addr, 0, sizeof(struct in_addr));
+
 	if (_do_ioctl(iface, AF_INET, SIOCGIFADDR, &req) < 0)
 		return -1;
 
@@ -449,6 +453,8 @@ int libamg_get_interface_ipv4_addr(char *iface, struct in_addr *addr)
 int libamg_get_interface_ipv6_addr(char *iface, struct in6_addr *addr)
 {
 	struct sockaddr_in6 saddr;
+
+	memset(addr, 0, sizeof(struct in6_addr));
 
 	if (_do_getifaddrs(iface, AF_INET6, (struct sockaddr *) &saddr) < 0)
 		return -1;
