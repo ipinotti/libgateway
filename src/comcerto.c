@@ -73,7 +73,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 	memset(conf, 0, sizeof(struct libamg_comcerto_config));
 
 	/* Open Comcerto config file */
-	file = fopen(FILE_COMCERTO_CONF_PATH, "r");
+	file = fopen(FILE_COMCERTO_CONF, "r");
 	if (file == NULL) {
 		libamg_log_error("Error opening file\n");
 		return NULL;
