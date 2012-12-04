@@ -166,7 +166,7 @@ int libamg_dahdi_get_switchtype_code(const char *switchtype_name);
 /**
  * libamg_dahdi_get_status
  *
- * Get Dahdi system status.
+ * Get Dahdi system status (alarms).
  *
  * @return struct libamg_dahdi_status *
  */
