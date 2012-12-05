@@ -213,7 +213,14 @@ static int _write_autoswitch(int conn_id, struct _SET_PASSTHRU_AUTOSWITCH *opt)
 /****************************************************/
 /****************************************************/
 /****************************************************/
+int libamg_dsp_set_rtp_interval(int conn_id, SVoIPChnlParams *parms, int interval)
+{
+	struct _VOIP_VCEOPT *opt = &parms->stVoiceOpt;
 
+	opt->param_4.bits.packet_interval = interval;
+
+	return _write_vceopt(conn_id, opt);
+}
 
 int libamg_dsp_set_vad(int conn_id, SVoIPChnlParams *parms, int enable, int tune)
 {
