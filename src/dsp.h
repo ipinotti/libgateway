@@ -36,6 +36,16 @@
 #define amg_dbg(x,...) syslog(LOG_DEBUG, x, ##__VA_ARGS__)
 
 /**
+ * Set RTP packet interval for connection
+ *
+ * @param conn_id: Connection in question
+ * @param parms: Pointer to channel parameters
+ * @param interval: interval for packets in miliseconds
+ * @return 0 if success, negative if error
+ */
+int libamg_dsp_set_rtp_interval(int conn_id, SVoIPChnlParams *parms, int interval);
+
+/**
  * Enable/Disable Voice Active Detection on connection
  *
  * @param conn_id: Connection in question
