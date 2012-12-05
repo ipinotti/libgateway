@@ -631,7 +631,7 @@ int libamg_dsp_fax_autoswitch_set(int conn_id)
 
 	memset(&opt, 0, sizeof(opt));
 
-	opt.param_4.bits.pt_autoswitch = 5; /* Fax Pass-through '101' */
+	opt.param_4.bits.pt_autoswitch = 1; /* Enable Auto-switch '001' */
 	opt.param_4.bits.sw_ind = 1; /* Enable host indication */
 	opt.param_4.bits.ptchng = 1; /* Autoswitch when VBD in RTP */
 	opt.param_4.bits.rfc2833 = 1; /* Autoswitch when RFC2833 in RTP: Should we test dtmfmode? */
