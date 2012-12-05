@@ -145,7 +145,7 @@ char *libamg_system_get_cpu_usage(void)
 					(float)(softirq-softirq_old)*scale);
 
 #else
-			sprintf(cpu_usage, "processor usage : %0.1f%% system, %0.1f%% idle", cpu,
+			sprintf(cpu_usage, "%0.1f%% system, %0.1f%% idle", cpu,
 			                (float) ((idle - idle_old) * scale));
 #endif
 

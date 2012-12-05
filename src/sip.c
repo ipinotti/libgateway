@@ -359,6 +359,8 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 			strncpy(conf->register_username, value, 63);
 		} else if (!strcmp(key, ";reg_secret")) {
 			strncpy(conf->register_secret, value, 63);
+		} else if (!strcmp(key, ";reg_host")) {
+			strncpy(conf->register_host, value, 63);
 
 			/* Account confs*/
 		} else if (!strcmp(key, "host")) {
@@ -462,25 +464,33 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	/* Save SIP account registration */
 	fprintf(file, ";reg_username=%s\n", conf->register_username);
 	fprintf(file, ";reg_secret=%s\n", conf->register_secret);
+	fprintf(file, ";reg_host=%s\n", conf->register_host);
 
-	if (conf->register_enable) {
+	if ((conf->register_enable) &&
+		(strlen(conf->register_username)) &&
+		(strlen(conf->register_secret)) &&
+		(strlen(conf->register_host))){
 		/* register=>transport://user:pass@sip_host:sip_port/sip_account_name */
 		fprintf(file, "register=>%s://%s:%s@%s:%hd/%s\n",
 				account->transport, conf->register_username,
-				conf->register_secret, account->host,
+				conf->register_secret, conf->register_host,
 				account->port, SIP_ACCOUNT_NAME);
 	}
 
 	/* Save SIP account parameters */
 	fprintf(file, "\n[%s]\n", SIP_ACCOUNT_NAME);
 	fprintf(file, "%s", SIP_ACCOUNT_CONTENT);
-	fprintf(file, "host=%s\n", account->host);
+	if (strlen(account->host))
+		fprintf(file, "host=%s\n", account->host);
 	fprintf(file, "port=%hd\n", account->port);
-	fprintf(file, "username=%s\n", account->username);
-	fprintf(file, "secret=%s\n", account->secret);
+	if (strlen(account->username))
+		fprintf(file, "username=%s\n", account->username);
+	if (strlen(account->secret))
+		fprintf(file, "secret=%s\n", account->secret);
 	fprintf(file, "dtmfmode=%s\n", account->dtmfmode);
-	fprintf(file, "callerid=%s\n", account->callerid);
-	if (strlen(account->fromuser) > 0)
+	if (strlen(account->callerid))
+		fprintf(file, "callerid=%s\n", account->callerid);
+	if (strlen(account->fromuser))
 		fprintf(file, "fromuser=%s\n", account->fromuser);
 	fprintf(file, "nat=%s\n", account->nat ? "yes" : "no");
 	fprintf(file, "qualify=%s\n", account->qualify ? "yes" : "no");

@@ -64,7 +64,6 @@
 				"mfcr2_metering_pulse_timeout=1000\n" \
 				"#include chan_dahdi_custom.conf\n"
 
-#define MAX_SPANS	1
 #define NUMSPANS	1
 #define BUF_SIZE	256
 
@@ -119,7 +118,7 @@ struct libamg_dahdi_span {
 };
 
 struct libamg_dahdi_config {
-	struct libamg_dahdi_span spans[MAX_SPANS];
+	struct libamg_dahdi_span spans[NUMSPANS];
 };
 
 struct libamg_dahdi_span_status {
@@ -128,7 +127,7 @@ struct libamg_dahdi_span_status {
 };
 
 struct libamg_dahdi_status {
-	struct libamg_dahdi_span_status spans[MAX_SPANS];
+	struct libamg_dahdi_span_status spans[NUMSPANS];
 };
 
 

@@ -164,6 +164,7 @@ struct libamg_sip_config {
 	int register_enable;
 	char register_username[64];
 	char register_secret[64];
+	char register_host[64];
 	libamg_jb_config jb_conf;
 	struct libamg_sip_account accounts[NUM_SIP_ACCOUNTS];
 };
