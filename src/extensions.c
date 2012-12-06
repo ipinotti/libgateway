@@ -89,6 +89,10 @@ struct libamg_extensions_config *libamg_extensions_parse_config(void)
 			conf->prefix = atoi(value);
 			conf->prefix_enable = 1;
 		}
+		else {
+			conf->prefix = -1;
+			conf->prefix_enable = 0;
+		}
 	}
 	fclose(file);
 
