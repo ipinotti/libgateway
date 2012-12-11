@@ -30,6 +30,15 @@
  */
 
 /**
+ * libamg_str_striplf
+ *
+ * Removes line feed from string
+ *
+ * @param str
+ */
+void libamg_str_striplf(char *str);
+
+/**
  * libamg_str_skip_spaces
  *
  * Skip spaces from a given string.

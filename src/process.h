@@ -48,8 +48,6 @@
 
 #define ON		1
 #define OFF 	0
-#define ISDN	0
-#define MFCR2	1
 
 #define MAX_PROC_CMDLINE   256
 

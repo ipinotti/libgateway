@@ -81,7 +81,7 @@ struct libamg_extensions_config *libamg_extensions_parse_config(void)
 		value = libamg_str_next_token(buffer, '=');
 
 		/* Crop trailing commentary */
-		strtok(value, " \t\n;#");
+		strtok(value, " \t\n\0;#");
 
 		/* Parse parameters */
 			/* General confs */
