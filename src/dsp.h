@@ -28,6 +28,7 @@
 #include <vapi/vapi.h>
 #include <vapi/ut.h>
 #include <vapi/gtl.h>
+#include <vapi/comcerto-stat-combined-voice-types.h>
 
 #include <syslog.h>
 
@@ -263,5 +264,23 @@ int libamg_dsp_dtmf_stop_tone(int conn_id);
  * @return 0 if success, negative if error
  */
 int libamg_dsp_fax_autoswitch_set(int conn_id);
+
+/**
+ * Reset statistics for a certain connection
+ *
+ * @param conn_id: Connection in question
+ * @return 0 if success, -1 if error
+ */
+int libamg_dsp_rtp_reset_channel_stats(int conn_id);
+
+/**
+ * Fetch number of received RTP packets in connection
+ *
+ * @note Counter is reset between reads
+ *
+ * @param conn_id: Connection in question
+ * @return Number of Rx packets or -1 if error
+ */
+int libamg_dsp_rtp_get_rxpkts(int conn_id);
 
 #endif /* DSP_H_ */

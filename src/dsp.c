@@ -639,4 +639,151 @@ int libamg_dsp_fax_autoswitch_set(int conn_id)
 	opt.param_6.bits.delay = 60; /* default jitter buffer delay */
 
 	return _write_autoswitch(conn_id, &opt);
+/********************************************************/
+/****************** STATISTICS **************************/
+/********************************************************/
+
+#ifdef DEBUG_STAT
+static void display_voice_stats(struct _VOIP_VCEINFO *voice_stat)
+{
+	/*parameters [4:5]*/
+	amg_dbg("voice_stat format %d\n", voice_stat->format);
+	/*parameters [8:9]*/
+	amg_dbg("voice_stat call_timer %d\n",voice_stat->call_timer);
+	/*parameters [10:11]*/
+	amg_dbg("voice_stat cur_playout_delay %d\n",voice_stat->cur_playout_delay);
+	/*parameters [12:13]*/
+	amg_dbg("voice_stat min_playout_delay %d\n",voice_stat->min_playout_delay);
+	/*parameters [14:15]*/
+	amg_dbg("voice_stat max_playout_delay %d\n",voice_stat->max_playout_delay);
+	/*parameters [16:17]*/
+	amg_dbg("voice_stat clock_offset %d\n",voice_stat->clock_offset);
+	/*parameters [18:19]*/
+	amg_dbg("voice_stat peak_jitter %d\n",voice_stat->peak_jitter);
+	/*parameters [20:21]*/
+	amg_dbg("voice_stat interpolative_concealment %d\n",voice_stat->interpolative_concealment);
+	/*parameters [22:23]*/
+	amg_dbg("voice_stat silence_concealment %d\n",voice_stat->silence_concealment);
+	/*parameters [24:25]*/
+	amg_dbg("voice_stat overflow_discard %d\n",voice_stat->overflow_discard);
+	/*parameters [26:27]*/
+	amg_dbg("voice_stat ep_detection_errors %d\n",voice_stat->ep_detection_errors);
+	/*parameters [28:29]*/
+	amg_dbg("voice_stat tx_voice_packets %d\n",ntohl(voice_stat->tx_voice_packets));
+	/*parameters [30:31]*/
+	amg_dbg("voice_stat tx_signaling_packets %d\n",voice_stat->tx_signaling_packets);
+	/*parameters [32:33]*/
+	amg_dbg("voice_stat tx_comfort_noise_packets %d\n",voice_stat->tx_comfort_noise_packets);
+	/*parameters [34:35]*/
+	amg_dbg("voice_stat total_transmit_duration %d\n",voice_stat->total_transmit_duration);
+	/*parameters [36:37]*/
+	amg_dbg("voice_stat voice_transmit_duration %d\n",voice_stat->voice_transmit_duration);
+	/*parameters [38:39]*/
+	amg_dbg("voice_stat rx_voice_packets %d\n",voice_stat->rx_voice_packets);
+	/*parameters [40:41]*/
+	amg_dbg("voice_stat rx_signaling_packets %d\n",voice_stat->rx_signaling_packets);
+	/*parameters [42:43]*/
+	amg_dbg("voice_stat rx_comfort_noise_packets %d\n",voice_stat->rx_comfort_noise_packets);
+	/*parameters [44:45]*/
+	amg_dbg("voice_stat total_receive_duration %d\n",voice_stat->total_receive_duration);
+	/*parameters [46:47]*/
+	amg_dbg("voice_stat voice_receive_duration %d\n",voice_stat->voice_receive_duration);
+	/*parameters [48:49]*/
+	amg_dbg("voice_stat packets_out_sequence %d\n",voice_stat->packets_out_sequence);
+	/*parameters [50:51]*/
+	amg_dbg("voice_stat bad_protocol_headers %d\n",voice_stat->bad_protocol_headers);
+	/*parameters [52:53]*/
+	amg_dbg("voice_stat late_packets %d\n",voice_stat->late_packets);
+	/*parameters [54:55]*/
+	amg_dbg("voice_stat early_packets %d\n",voice_stat->early_packets);
+	/*parameters [56:57]*/
+	amg_dbg("voice_stat rx_voice_octets %d\n",voice_stat->rx_voice_octets);
+	/*parameters [58:59]*/
+	amg_dbg("voice_stat lost_packets %d\n",voice_stat->lost_packets);
+	/*parameters [60:61]*/
+	amg_dbg("voice_stat cur_transmit_power %d\n",voice_stat->cur_transmit_power);
+	/*parameters [62:63]*/
+	amg_dbg("voice_stat mean_transmit_power %d\n",voice_stat->mean_transmit_power);
+	/*parameters [64:65]*/
+	amg_dbg("voice_stat cur_receive_power %d\n",voice_stat->cur_receive_power);
+	/*parameters [66:67]*/
+	amg_dbg("voice_stat mean_receive_power %d\n",voice_stat->mean_receive_power);
+	/*parameters [68:69]*/
+	amg_dbg("voice_stat background_noise %d\n",voice_stat->background_noise);
+	/*parameters [70:71]*/
+	amg_dbg("voice_stat erl_level %d\n",voice_stat->erl_level);
+	/*parameters [72:73]*/
+	amg_dbg("voice_stat acom_level %d\n",voice_stat->acom_level);
+	/*parameters [74:75]*/
+	amg_dbg("voice_stat cur_transmit_activity %d\n",voice_stat->cur_transmit_activity);
+	/*parameters [76:77]*/
+	amg_dbg("voice_stat cur_receive_activity %d\n",voice_stat->cur_receive_activity);
+}
+#endif
+
+static int __get_channel_stats(int conn_id, struct _VOIP_VCEINFO *voice_stat, int reset) {
+	VSTATUS result;
+	void *message;
+	U32 response_len = 512;
+	U8 device_response[512];
+	int i;
+
+	/* allocate a message to query the current options */
+	message = VAPI_AllocateMessage(512);
+	if (message == NULL)
+		return FAILURE;
+
+	/* build the command to get the statistics*/
+	result = VAPI_SetMessage(message, CMD_CLASS_STAT_CHANNEL,
+			CMD_TYPE_STAT_VOIP_VCEINFO, reset, 0); /*0 no stats reset, 0 parameters*/
+	if (result != SUCCESS)
+		goto out;
+
+	/* send the query, the response is stored in device_response*/
+	result = VAPI_SendConnectionMessage(conn_id, (SMsg *) message, NULL,
+			device_response, &response_len);
+	if (result != SUCCESS)
+		goto out;
+
+	/* point to the beginning of the parameters*/
+	memcpy(voice_stat, &device_response[sizeof(struct comcerto_api_hdr)],
+			sizeof(struct _VOIP_VCEINFO));
+
+#ifdef DEBUG_STAT
+	amg_log("Response len is %d\n", response_len);
+
+	for (i = 0; i < response_len; i+=4) {
+		amg_log("%02x %02x %02x %02x\n",
+				((char *)voice_stat)[i], ((char *)voice_stat)[i+1],
+				((char *)voice_stat)[i+2], ((char *)voice_stat)[i+3]);
+	}
+#endif
+
+out:
+	VAPI_FreeMessage(message);
+
+	return result;
+}
+
+int libamg_dsp_rtp_reset_channel_stats(int conn_id)
+{
+	struct _VOIP_VCEINFO st;
+
+	if (__get_channel_stats(conn_id, &st, 1) != SUCCESS)
+		return -1;
+
+	return 0;
+}
+
+int libamg_dsp_rtp_get_rxpkts(int conn_id)
+{
+	struct _VOIP_VCEINFO st;
+
+	if (__get_channel_stats(conn_id, &st, 1) != SUCCESS)
+		return -1;
+#ifdef DEBUG_STAT
+	display_voice_stats(&st);
+#endif
+
+	return st.rx_voice_packets;
 }
