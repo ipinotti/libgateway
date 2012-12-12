@@ -639,6 +639,8 @@ int libamg_dsp_fax_autoswitch_set(int conn_id)
 	opt.param_6.bits.delay = 60; /* default jitter buffer delay */
 
 	return _write_autoswitch(conn_id, &opt);
+}
+
 /********************************************************/
 /****************** STATISTICS **************************/
 /********************************************************/
