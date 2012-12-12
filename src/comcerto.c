@@ -88,7 +88,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		value = libamg_str_next_token(buffer, '=');
 
 		/* Crop trailing commentary */
-		strtok(value, " \t\n;#");
+		strtok(value, " \t\n\0;#");
 
 		/* Parse parameters */
 		if (!strcmp(key, "codec_g723_1")) {
@@ -163,14 +163,14 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	struct libamg_sip_config * sip_conf;
 
 	/* Open Comcerto config file */
-	file = fopen(FILE_COMCERTO_CONF_PATH, "w");
+	file = fopen(FILE_COMCERTO_CONF, "w");
 	if (file == NULL) {
 		libamg_log_error("Error opening file\n");
 		return -1;
 	}
 
 	/* Tag needed by Asterisk */
-	fprintf(file, "[general]\n\n");
+	fprintf(file, "[general]\n");
 
 	/* Save Comcerto conf. parameters */
 	fprintf(file, "ais_enable=%s\n", conf->ais_enable ? "yes" : "no");

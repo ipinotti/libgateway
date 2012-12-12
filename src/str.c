@@ -29,6 +29,15 @@
 
 #include "str.h"
 
+void libamg_str_striplf(char *str)
+{
+	int ln = strlen(str);; /* string length */
+
+	/* Removes anything below 32 (ascii) */
+	while ((ln > 0) && (str[ln - 1] < 32))
+		str[--ln] = 0;
+}
+
 char *libamg_str_skip_spaces(const char *str)
 {
 	while (isspace(*str))

@@ -307,7 +307,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		value = libamg_str_next_token(buffer, '=');
 
 		/* Crop trailing commentary */
-		strtok(value, " \t\n;#");
+		strtok(value, " \t\n\0;#");
 
 		/* Parse parameters */
 			/* General confs */
@@ -382,6 +382,7 @@ struct libamg_sip_config *libamg_sip_parse_config(void)
 		} else if (!strcmp(key, "callerid")) {
 			strncpy(account->callerid, value, 63);
 		} else if (!strcmp(key, "fromuser")) {
+			libamg_str_striplf(value);
 			strncpy(account->fromuser, value, 63);
 		} else if (!strcmp(key, "transport")) {
 			strncpy(account->transport, value, 7);
@@ -462,8 +463,11 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 		fprintf(file, "session-refresher=%s\n", conf->session_refresher);
 
 	/* Save SIP account registration */
+	libamg_str_striplf(conf->register_username);
 	fprintf(file, ";reg_username=%s\n", conf->register_username);
+	libamg_str_striplf(conf->register_secret);
 	fprintf(file, ";reg_secret=%s\n", conf->register_secret);
+	libamg_str_striplf(conf->register_host);
 	fprintf(file, ";reg_host=%s\n", conf->register_host);
 
 	if ((conf->register_enable) &&
@@ -480,17 +484,23 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	/* Save SIP account parameters */
 	fprintf(file, "\n[%s]\n", SIP_ACCOUNT_NAME);
 	fprintf(file, "%s", SIP_ACCOUNT_CONTENT);
-	if (strlen(account->host))
+
+	libamg_str_striplf(account->host);
+	if (strlen(account->host) > 0)
 		fprintf(file, "host=%s\n", account->host);
 	fprintf(file, "port=%hd\n", account->port);
-	if (strlen(account->username))
+	libamg_str_striplf(account->username);
+	if (strlen(account->username) > 0)
 		fprintf(file, "username=%s\n", account->username);
-	if (strlen(account->secret))
+	libamg_str_striplf(account->secret);
+	if (strlen(account->secret) > 0)
 		fprintf(file, "secret=%s\n", account->secret);
 	fprintf(file, "dtmfmode=%s\n", account->dtmfmode);
-	if (strlen(account->callerid))
+	libamg_str_striplf(account->callerid);
+	if (strlen(account->callerid) > 0)
 		fprintf(file, "callerid=%s\n", account->callerid);
-	if (strlen(account->fromuser))
+	libamg_str_striplf(account->fromuser);
+	if (strlen(account->fromuser) > 0)
 		fprintf(file, "fromuser=%s\n", account->fromuser);
 	fprintf(file, "nat=%s\n", account->nat ? "yes" : "no");
 	fprintf(file, "qualify=%s\n", account->qualify ? "yes" : "no");
