@@ -779,7 +779,7 @@ int libamg_dsp_rtp_get_rxpkts(int conn_id)
 {
 	struct _VOIP_VCEINFO st;
 
-	if (__get_channel_stats(conn_id, &st, 1) != SUCCESS)
+	if (__get_channel_stats(conn_id, &st, 0) != SUCCESS)
 		return -1;
 #ifdef DEBUG_STAT
 	display_voice_stats(&st);
