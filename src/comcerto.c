@@ -41,6 +41,33 @@
 
 #define BUF_SIZE 128
 
+int libamg_comcerto_get_codec_passthrough_code(const char *codec_name)
+{
+	if (!strcmp(codec_name, CODEC_G711_A_NAME))
+		return CODEC_G711_A_COD;
+	else if (!strcmp(codec_name, CODEC_G711_U_NAME))
+		return CODEC_G711_U_COD;
+	else
+		return 0;
+}
+
+char * libamg_comcerto_get_codec_passthrough_name(int codec_code)
+{
+	switch (codec_code) {
+		case CODEC_G711_A_COD:
+			return CODEC_G711_A_NAME;
+			break;
+		case CODEC_G711_U_COD:
+			return CODEC_G711_U_NAME;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+
+	return 0;
+}
+
 int libamg_comcerto_reset_config(void)
 {
 	char command[BUF_SIZE];
@@ -93,6 +120,8 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		/* Parse parameters */
 		if (!strcmp(key, "codec_g723_1")) {
 			conf->ais_enable = !strcmp(value, "6.3kbps");
+		} else if (!strcmp(key, "pass_through")) {
+			conf->pass_through = libamg_comcerto_get_codec_passthrough_code(value);
 		} else if (!strcmp(key, "ais_enable")) {
 			conf->ais_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "vad_enable")) {
@@ -101,7 +130,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 			conf->vad_level = atoi(value);
 		} else if (!strcmp(key, "cng_enable")) {
 			conf->cng_enable = !strcmp(value, "yes");
-		} else if (!strcmp(key, "echocan_enable")) {
+		} else if (!strcmp(key, "echocancel_enable")) {
 			conf->echocan_enable = !strcmp(value, "yes");
 		} else if (!strcmp(key, "txgain")) {
 			conf->txgain = atoi(value);
@@ -133,7 +162,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 		else if (!strcmp(key, "codec_intvl_g711_a")) {
 			conf->codecs_intvl.g711_a = atoi(value);
 		} else if (!strcmp(key, "codec_intvl_g711_u")) {
-			conf->codecs_intvl.g711_a = atoi(value);
+			conf->codecs_intvl.g711_u = atoi(value);
 		} else if (!strcmp(key, "codec_intvl_g723_1")) {
 			conf->codecs_intvl.g723_1 = atoi(value);
 		} else if (!strcmp(key, "codec_intvl_g726_16")) {
@@ -177,7 +206,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "vad_enable=%s\n", conf->vad_enable ? "yes" : "no");
 	fprintf(file, "vad_level=%hd\n", conf->vad_level);
 	fprintf(file, "cng_enable=%s\n", conf->cng_enable ? "yes" : "no");
-	fprintf(file, "echocan_enable=%s\n", conf->echocan_enable ? "yes" : "no");
+	fprintf(file, "echocancel_enable=%s\n", conf->echocan_enable ? "yes" : "no");
 	fprintf(file, "ectail=%hd\n", conf->ectail);
 	fprintf(file, "e1_enable=%s\n", conf->e1_enable ? "yes" : "no");
 	fprintf(file, "e1_loopback_enable=%s\n", conf->e1_loopback_enable ? "yes" : "no");
@@ -194,6 +223,9 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "rxgain=%hd\n",conf->rxgain);
 	/* G723.1 codec config */
 	fprintf(file, "codec_g723_1=%s\n", conf->codec_g723_1 ? "6.3kbps" : "5.3kbps");
+	/* Pass-through config */
+	if (conf->pass_through)
+		fprintf(file, "pass_through=%s\n", libamg_comcerto_get_codec_passthrough_name(conf->pass_through));
 
 	/* Codecs Intervals */
 	fprintf(file, "codec_intvl_g711_a=%hd\n",conf->codecs_intvl.g711_a);

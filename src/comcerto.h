@@ -117,6 +117,7 @@ typedef struct libamg_jb_config {
 
 struct libamg_comcerto_config {
 	int codec_g723_1;
+	int pass_through;
 	int ais_enable;
 	int vad_enable;
 	int vad_level;
@@ -135,6 +136,26 @@ struct libamg_comcerto_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_comcerto_get_codec_passthrough_code
+ *
+ * Get SIP codec passthrough code by addressed name in spec.
+ *
+ * @param codec_name
+ * @return int
+ */
+int libamg_comcerto_get_codec_passthrough_code(const char *codec_name);
+
+/**
+ * libamg_comcerto_get_codec_passthrough_name
+ *
+ * Get SIP codec passthrough name by addressed code in spec.
+ *
+ * @param codec_code
+ * @return string
+ */
+char * libamg_comcerto_get_codec_passthrough_name(int codec_code);
 
 /**
  * libamg_comcerto_rtp_reset_config

@@ -504,8 +504,10 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 		fprintf(file, "fromuser=%s\n", account->fromuser);
 	fprintf(file, "nat=%s\n", account->nat ? "yes" : "no");
 	fprintf(file, "qualify=%s\n", account->qualify ? "yes" : "no");
-	fprintf(file, "insecure=%s\n", account->insecure);
-	fprintf(file, "transport=%s\n", account->transport);
+	if (strlen(account->insecure) > 0)
+		fprintf(file, "insecure=%s\n", account->insecure);
+	if (strlen(account->transport) > 0)
+		fprintf(file, "transport=%s\n", account->transport);
 
 	/* Save SIP Codecs */
 	for (pos_codec = 0; pos_codec < NUM_AVAILABLE_CODECS; ++pos_codec) {
@@ -530,7 +532,7 @@ void libamg_sip_flash_save_config(void)
 	system("cp " FILE_SIP_CONF " /mnt/config/asterisk");
 }
 
-int libamg_asterisk_get_register(char *response, int maxlen)
+int libamg_sip_get_register(char *response, int maxlen)
 {
 	regex_t regex;
 	regmatch_t matches[10];

@@ -333,7 +333,7 @@ int libamg_sip_save_config(struct libamg_sip_config *conf);
 void libamg_sip_flash_save_config(void);
 
 /**
- * libamg_asterisk_get_register
+ * libamg_sip_get_register
  *
  * Gets the 'register' status from Asterisk.
  *
@@ -341,6 +341,6 @@ void libamg_sip_flash_save_config(void);
  * @param maxlen
  * @return -1 for an error, 0 if register not OK, 1 of register OK.
  */
-int libamg_asterisk_get_register(char *response, int maxlen);
+int libamg_sip_get_register(char *response, int maxlen);
 
 #endif /* SIP_H_ */
