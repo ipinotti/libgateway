@@ -41,6 +41,17 @@
 #include "log.h"
 #include "str.h"
 
+#define BIT_SET(a,b) ((a) |= (1<<(b)))
+#define BIT_CLEAR(a,b) ((a) &= ~(1<<(b)))
+#define BIT_FLIP(a,b) ((a) ^= (1<<(b)))
+#define BIT_CHECK(a,b) ((a) & (1<<(b)))
+
+static int _getBit(int number, int position)
+{
+    unsigned int bitmask = 1 << position;
+    return (number & bitmask) ? 1 : 0;
+}
+
 int libamg_dahdi_reset_config(void)
 {
 	char command[BUF_SIZE];
@@ -292,6 +303,26 @@ int _parse_chan_dahdi_channel_line(struct libamg_dahdi_config *conf,
 	return 0;
 }
 
+int _parse_chan_dahdi_channel_bitmap_line(struct libamg_dahdi_config *conf,
+        								  struct libamg_dahdi_span *span,
+        								  char *line)
+{
+	int span_offset;
+	char *p = strtok (line,",");
+
+	span_offset = (atoi(p)) / 31;
+
+	while (p != NULL)
+	{
+		if (atoi(p))
+			 span->channels_bitmap = BIT_SET(span->channels_bitmap, atoi(p));
+		p = strtok (NULL, ",");
+	}
+
+	memcpy(&conf->spans[span_offset], span, sizeof(*span));
+	return 0;
+}
+
 int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 {
 	FILE *file;
@@ -357,9 +388,17 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 			} else {
 				span.mfcr2.double_answer = 0;
 			}
+#ifdef DAHDI_CHANNEL_STANDARD_MODE
+		} else if (!strcmp(key, ";channels_offset")) {
+			span.channels_offset = atoi(value);
 		} else if (!strcmp(key, "channel")) {
 			value = libamg_str_next_token(value, '>');
 			_parse_chan_dahdi_channel_line(conf, &span, value);
+#else
+		} else if (!strcmp(key, "channel")) {
+			value = libamg_str_next_token(value, '>');
+			_parse_chan_dahdi_channel_bitmap_line(conf, &span, value);
+#endif
 		} else if (!strcmp(key, "echocancel")) {
 			if (!strcmp(value, "yes")) {
 				span.echocancel = 1;
@@ -415,6 +454,24 @@ void _gen_channels_line(char *line, int span, int channels)
 	}
 }
 
+void _gen_channels_bitmap_line(char *line, int span, int channels_bitmap)
+{
+	int i = 0;
+	int first = 0;
+	int offset = span * 31;
+	int length = 0;
+
+	for (i = 0; i < 32; ++i) {
+		if (_getBit(channels_bitmap, i)){
+			if (!first)
+				first = 1;
+			else
+				strcat(line, ",");
+			length += sprintf(line+length, "%d", i+offset);
+		}
+	}
+}
+
 int libamg_dahdi_apply_system_conf(struct libamg_dahdi_config *conf)
 {
 	FILE *file;
@@ -462,6 +519,8 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 	char buffer[BUF_SIZE];
 	struct libamg_dahdi_span *span;
 
+	memset(buffer, 0, sizeof(buffer));
+
 	/* Open file */
 	file = fopen(FILE_CHAN_DAHDI_CONF, "w");
 	if (file == NULL) {
@@ -505,10 +564,18 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		/* Group */
 		fprintf(file, "group=%d\n", i + 1);
 
+#ifdef DAHDI_CHANNEL_STANDARD_MODE
+		/* Channels Offset */
+		fprintf(file, ";channels_offset=%d\n", span->channels_offset);
+
 		/* Channels */
 		_gen_channels_line(buffer, i, conf->spans[i].channels);
 		fprintf(file, "channel=>%s\n", buffer);
-
+#else
+		/* Channels Bitmap */
+		_gen_channels_bitmap_line(buffer, i, conf->spans[i].channels_bitmap);
+		fprintf(file, "channel=>%s\n", buffer);
+#endif
 		/* Echo Cancel */
 		fprintf(file, "echocancel=%s\n",
 				span->echocancel ? "yes" : "no");
