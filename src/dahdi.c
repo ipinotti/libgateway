@@ -577,8 +577,7 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		fprintf(file, "channel=>%s\n", buffer);
 #endif
 		/* Echo Cancel */
-		fprintf(file, "echocancel=%s\n",
-				span->echocancel ? "yes" : "no");
+		fprintf(file, "echocancel=%s\n", span->echocancel ? "yes" : "no");
 	}
 
 	fclose(file);
