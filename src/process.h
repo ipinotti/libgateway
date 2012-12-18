@@ -163,4 +163,14 @@ int libamg_process_check_inetd_program(char *prog);
  */
 int libamg_process_prog_capture(char *buffer, int len, char *path, ...);
 
+
+#define FLAG_DIR "/var/run/flags/"
+#define FLAG_COMCERTO_TDM_CONFIGURED "comcerto_tdm_configured"
+#define FLAG_COMCERTO_VAPI_CONFIGURED "comcerto_vapi_configured"
+
+
+int libamg_process_set_flag(char *flagname);
+int libamg_process_clear_flag(char *flagname);
+int libamg_process_check_flag(char *flagname);
+
 #endif /* PROCESS_H_ */

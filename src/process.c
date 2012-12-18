@@ -461,3 +461,45 @@ int libamg_process_prog_capture(char *buffer, int len, char *path, ...)
 		break;
 	}
 }
+
+int libamg_process_set_flag(char *flagname)
+{
+	char filename[256];
+	int fd;
+
+	sprintf(filename, "%s%s", FLAG_DIR, flagname);
+
+	fd = open(filename, O_CREAT | O_WRONLY);
+
+	if (fd < 0)
+		return -1;
+
+	close(fd);
+
+	return 0;
+}
+
+int libamg_process_check_flag(char *flagname)
+{
+	char filename[256];
+	int fd;
+
+	sprintf(filename, "%s%s", FLAG_DIR, flagname);
+
+	fd = open(filename, O_RDONLY);
+
+	if (fd < 0)
+		return 0;
+
+	close(fd);
+	return 1;
+}
+
+int libamg_process_clear_flag(char *flagname)
+{
+	char filename[256];
+
+	sprintf(filename, "%s%s", FLAG_DIR, flagname);
+
+	return unlink(filename);
+}
