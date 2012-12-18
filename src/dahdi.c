@@ -290,9 +290,9 @@ int _parse_chan_dahdi_channel_line(struct libamg_dahdi_config *conf,
 	} else if (res == 2) {
 		span->channels = a - first + 1;
 	} else if (res == 3) {
-		span->channels = b - first;
+		span->channels = a - first + 2;
 	} else if (res == 4) {
-		span->channels = c - first;
+		span->channels = c-b+a-first+2;
 	} else {
 		return -1;
 	}
@@ -307,6 +307,8 @@ int _parse_chan_dahdi_channel_bitmap_line(struct libamg_dahdi_config *conf,
         								  struct libamg_dahdi_span *span,
         								  char *line)
 {
+	//TODO FIXME
+#ifdef NOT_READY
 	int span_offset;
 	char *p = strtok (line,",");
 
@@ -329,7 +331,7 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 	char buffer[BUF_SIZE];
 	char *key;
 	char *value;
-	struct libamg_dahdi_span span;
+	struct libamg_dahdi_span * span;
 
 	/* Open file */
 	file = fopen(FILE_CHAN_DAHDI_CONF, "r");
@@ -337,6 +339,13 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		libamg_log_error("Error opening file\n");
 		return -1;
 	}
+
+
+	/**********************************/
+	/* HACK - ONE SPAN ONLY FIXME TODO*/
+	span = &conf->spans[0];
+	/**********************************/
+
 
 	/* Parse file */
 	while (fgets(buffer, BUF_SIZE, file)) {
@@ -349,61 +358,64 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		/* Crop trailing commentary */
 		strtok(value, " \t\n;#");
 
+		/* HACK - BE ALWAYS ENABLE FIXME TODO*/
+		span->enable = 1;
+
 		/* Parse parameters */
 		if (!strcmp(key, "signalling")) {
 			if (!strcmp(value, "pri_net")) {
-				span.signalling = DAHDI_SIG_ISDN_NET;
+				span->signalling = DAHDI_SIG_ISDN_NET;
 			} else if (!strcmp(value, "pri_cpe")) {
-				span.signalling = DAHDI_SIG_ISDN_CPE;
+				span->signalling = DAHDI_SIG_ISDN_CPE;
 			} else {
-				span.signalling = DAHDI_SIG_MFCR2;
+				span->signalling = DAHDI_SIG_MFCR2;
 			}
 		} else if (!strcmp(key, "overlapdial")) {
 			if (!strcmp(value, "no")) {
-				span.isdn.overlapdial = 0;
+				span->isdn.overlapdial = 0;
 			} else {
-				span.isdn.overlapdial = 1;
+				span->isdn.overlapdial = 1;
 			}
 		} else if (!strcmp(key, "switchtype")) {
-			strncpy(span.isdn.switchtype, value, 15);
+			strncpy(span->isdn.switchtype, value, 15);
 		} else if (!strcmp(key, "mfcr2_get_ani_first")) {
 			if (!strcmp(value, "yes")) {
-				span.mfcr2.get_ani_first = 1;
+				span->mfcr2.get_ani_first = 1;
 			} else {
-				span.mfcr2.get_ani_first = 0;
+				span->mfcr2.get_ani_first = 0;
 			}
 		} else if (!strcmp(key, "mfcr2_max_ani")) {
-			span.mfcr2.max_ani = atoi(value);
+			span->mfcr2.max_ani = atoi(value);
 		} else if (!strcmp(key, "mfcr2_max_dnis")) {
-			span.mfcr2.max_dnis = atoi(value);
+			span->mfcr2.max_dnis = atoi(value);
 		} else if (!strcmp(key, "mfcr2_allow_collect_calls")) {
 			if (!strcmp(value, "no")) {
-				span.mfcr2.allow_collect_calls = 0;
+				span->mfcr2.allow_collect_calls = 0;
 			} else {
-				span.mfcr2.allow_collect_calls = 1;
+				span->mfcr2.allow_collect_calls = 1;
 			}
 		} else if (!strcmp(key, "mfcr2_double_answer")) {
 			if (!strcmp(value, "yes")) {
-				span.mfcr2.double_answer = 1;
+				span->mfcr2.double_answer = 1;
 			} else {
-				span.mfcr2.double_answer = 0;
+				span->mfcr2.double_answer = 0;
 			}
 #ifdef DAHDI_CHANNEL_STANDARD_MODE
 		} else if (!strcmp(key, ";channels_offset")) {
-			span.channels_offset = atoi(value);
+			span->channels_offset = atoi(value);
 		} else if (!strcmp(key, "channel")) {
 			value = libamg_str_next_token(value, '>');
-			_parse_chan_dahdi_channel_line(conf, &span, value);
+			_parse_chan_dahdi_channel_line(conf, span, value);
 #else
 		} else if (!strcmp(key, "channel")) {
 			value = libamg_str_next_token(value, '>');
-			_parse_chan_dahdi_channel_bitmap_line(conf, &span, value);
+			_parse_chan_dahdi_channel_bitmap_line(conf, span, value);
 #endif
 		} else if (!strcmp(key, "echocancel")) {
 			if (!strcmp(value, "yes")) {
-				span.echocancel = 1;
+				span->echocancel = 1;
 			} else {
-				span.echocancel = 0;
+				span->echocancel = 0;
 			}
 		}
 	}
@@ -519,8 +531,6 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 	char buffer[BUF_SIZE];
 	struct libamg_dahdi_span *span;
 
-	memset(buffer, 0, sizeof(buffer));
-
 	/* Open file */
 	file = fopen(FILE_CHAN_DAHDI_CONF, "w");
 	if (file == NULL) {
@@ -548,7 +558,8 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		/* Signalling parameters */
 		fprintf(file, "overlapdial=%s\n",
 				span->isdn.overlapdial ? "yes" : "no");
-		fprintf(file, "switchtype=%s\n", span->isdn.switchtype);
+		if (strlen(span->isdn.switchtype) > 0)
+			fprintf(file, "switchtype=%s\n", span->isdn.switchtype);
 		fprintf(file, "mfcr2_get_ani_first=%s\n",
 			span->mfcr2.get_ani_first ? "yes" : "no");
 		fprintf(file, "mfcr2_max_ani=%d\n", span->mfcr2.max_ani);
@@ -569,12 +580,14 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		fprintf(file, ";channels_offset=%d\n", span->channels_offset);
 
 		/* Channels */
-		_gen_channels_line(buffer, i, conf->spans[i].channels);
-		fprintf(file, "channel=>%s\n", buffer);
+		_gen_channels_line(buffer, i, span->channels);
+		if (strlen(buffer) > 0)
+			fprintf(file, "channel=>%s\n", buffer);
 #else
 		/* Channels Bitmap */
-		_gen_channels_bitmap_line(buffer, i, conf->spans[i].channels_bitmap);
-		fprintf(file, "channel=>%s\n", buffer);
+		_gen_channels_bitmap_line(buffer, i, span->channels_bitmap);
+		if (strlen(buffer) > 0)
+			fprintf(file, "channel=>%s\n", buffer);
 #endif
 		/* Echo Cancel */
 		fprintf(file, "echocancel=%s\n", span->echocancel ? "yes" : "no");
