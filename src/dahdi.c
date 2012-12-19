@@ -322,6 +322,7 @@ int _parse_chan_dahdi_channel_bitmap_line(struct libamg_dahdi_config *conf,
 	}
 
 	memcpy(&conf->spans[span_offset], span, sizeof(*span));
+#endif
 	return 0;
 }
 
