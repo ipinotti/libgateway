@@ -307,11 +307,8 @@ int _parse_chan_dahdi_channel_bitmap_line(struct libamg_dahdi_config *conf,
         								  struct libamg_dahdi_span *span,
         								  char *line)
 {
-	//TODO FIXME
-#ifdef NOT_READY
 	int span_offset;
 	char *p = strtok (line,",");
-
 	span_offset = (atoi(p)) / 31;
 
 	while (p != NULL)
@@ -322,6 +319,7 @@ int _parse_chan_dahdi_channel_bitmap_line(struct libamg_dahdi_config *conf,
 	}
 
 	memcpy(&conf->spans[span_offset], span, sizeof(*span));
+
 	return 0;
 }
 
@@ -342,7 +340,8 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 
 
 	/**********************************/
-	/* HACK - ONE SPAN ONLY FIXME TODO*/
+	/* FIXME TODO */
+	/* HACK - ONE SPAN ONLY */
 	span = &conf->spans[0];
 	/**********************************/
 
@@ -358,8 +357,11 @@ int libamg_dahdi_parse_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		/* Crop trailing commentary */
 		strtok(value, " \t\n;#");
 
-		/* HACK - BE ALWAYS ENABLE FIXME TODO*/
+		/**********************************/
+		/* FIXME TODO */
+		/* HACK - BE ALWAYS ENABLE */
 		span->enable = 1;
+		/**********************************/
 
 		/* Parse parameters */
 		if (!strcmp(key, "signalling")) {
@@ -478,7 +480,7 @@ void _gen_channels_bitmap_line(char *line, int span, int channels_bitmap)
 			if (!first)
 				first = 1;
 			else
-				strcat(line, ",");
+				length += sprintf(line+length, ",");
 			length += sprintf(line+length, "%d", i+offset);
 		}
 	}
@@ -575,6 +577,9 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 		/* Group */
 		fprintf(file, "group=%d\n", i + 1);
 
+		/* Echo Cancel */
+		fprintf(file, "echocancel=%s\n", span->echocancel ? "yes" : "no");
+
 #ifdef DAHDI_CHANNEL_STANDARD_MODE
 		/* Channels Offset */
 		fprintf(file, ";channels_offset=%d\n", span->channels_offset);
@@ -585,12 +590,12 @@ int libamg_dahdi_save_chan_dahdi_conf(struct libamg_dahdi_config *conf)
 			fprintf(file, "channel=>%s\n", buffer);
 #else
 		/* Channels Bitmap */
-		_gen_channels_bitmap_line(buffer, i, span->channels_bitmap);
-		if (strlen(buffer) > 0)
-			fprintf(file, "channel=>%s\n", buffer);
+		if (span->channels_bitmap > 0){
+			_gen_channels_bitmap_line(buffer, i, span->channels_bitmap);
+			if (strlen(buffer) > 0)
+				fprintf(file, "channel=>%s\n", buffer);
+		}
 #endif
-		/* Echo Cancel */
-		fprintf(file, "echocancel=%s\n", span->echocancel ? "yes" : "no");
 	}
 
 	fclose(file);

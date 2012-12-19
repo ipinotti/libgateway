@@ -110,7 +110,7 @@ struct libamg_dahdi_span {
 	int enable;
 	int channels;	/* Number of channels */
 	int channels_offset;
-	int channels_bitmap;
+	unsigned int channels_bitmap;
 	int clock;	/* Clock source (0, 1, etc.) */
 	int crc;
 	int signalling;
