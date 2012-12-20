@@ -189,6 +189,11 @@ struct tone_event_t {
 	struct tone_event_t *next;
 };
 
+/* Used in Asterisk to identify fax events frames */
+#define COMCERTO_EVENT_FAX_CED		256
+#define COMCERTO_EVENT_FAX_CNG		257
+#define COMCERTO_EVENT_FAX_ANS		258
+
 /**
  * Dequeue any existing tone event for a certain connection
  *
