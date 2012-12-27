@@ -40,3 +40,5 @@ doc/doxygen/html
 *.a
 .*
 Debug
+INSTALL
+README
