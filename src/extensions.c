@@ -39,6 +39,43 @@
 
 #define BUF_SIZE	256
 
+int libamg_extensions_check_config(void)
+{
+	FILE *file;
+	long size = 0;
+
+	file = fopen(FILE_EXTENSIONS_CONF, "r");
+
+	if (file == NULL) {
+		libamg_log_error("Error opening extensions.conf file\n");
+		return -1;
+	}
+
+	fseek (file, 0, SEEK_END);
+	size = ftell(file);
+	fclose(file);
+
+	if (size > 0)
+		return 1;
+	else
+		return 0;
+}
+
+int libamg_extensions_flush_config(void)
+{
+	FILE *file;
+
+	file = fopen(FILE_EXTENSIONS_CONF, "w");
+
+	if (file == NULL) {
+		libamg_log_error("Error opening extensions.conf file\n");
+		return -1;
+	}
+	fclose(file);
+
+	return 0;
+}
+
 int libamg_extensions_reset_config(void)
 {
 	char command[BUF_SIZE];

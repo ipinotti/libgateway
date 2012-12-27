@@ -84,6 +84,24 @@ struct libamg_extensions_config {
  */
 
 /**
+ * libamg_extensions_check_config
+ *
+ * Check if the configures are loaded inside the configuration file.
+ *
+ * @return 0 if no configure, 1 if present configure.
+ */
+int libamg_extensions_check_config(void);
+
+/**
+ * libamg_extensions_reset_config
+ *
+ * Flush the extensions configures, leaving a blank file
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_extensions_flush_config(void);
+
+/**
  * libamg_extensions_reset_config
  *
  * Restore the extensions configures from default extensions configuration file
