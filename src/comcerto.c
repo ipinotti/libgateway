@@ -119,7 +119,7 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 
 		/* Parse parameters */
 		if (!strcmp(key, "codec_g723_1")) {
-			conf->ais_enable = !strcmp(value, "6.3kbps");
+			conf->codec_g723_1 = !strcmp(value, "6.3kbps");
 		} else if (!strcmp(key, "pass_through")) {
 			conf->pass_through = libamg_comcerto_get_codec_passthrough_code(value);
 		} else if (!strcmp(key, "ais_enable")) {
