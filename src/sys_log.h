@@ -41,7 +41,7 @@
 #define FILE_SYS_LOG_CONF				FILE_SYS_LOG_CONF_PATH FILE_SYS_LOG_CONF_NAME
 #define FILE_SYS_LOG_CONF_DEFAULT_PATH	"/etc.ro/"
 
-#define DAEMON_SYS_LOG		"/bin/syslogd"
+#define DAEMON_SYS_LOG		"/sbin/syslogd"
 
 #define DAEMON_PORT_SYS_LOG 172
 
