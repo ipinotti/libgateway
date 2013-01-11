@@ -41,7 +41,18 @@
 
 #define BUF_SIZE 128
 
-char * libamg_comcerto_get_vad_enable(void)
+int libamg_comcerto_get_cng_enable(void)
+{
+	int cng_enable = 0;
+	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();
+
+	cng_enable = config->cng_enable;
+	free(config);
+
+	return cng_enable;
+}
+
+int libamg_comcerto_get_vad_enable(void)
 {
 	int vad_enable = 0;
 	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();

@@ -146,7 +146,16 @@ struct libamg_comcerto_config {
  *
  * @return 1 if enabled, 0 if disabled
  */
-char * libamg_comcerto_get_vad_enable(void);
+int libamg_comcerto_get_cng_enable(void);
+
+/**
+ * libamg_comcerto_get_vad_enable
+ *
+ * Get VAD enable
+ *
+ * @return 1 if enabled, 0 if disabled
+ */
+int libamg_comcerto_get_vad_enable(void);
 
 /**
  * libamg_comcerto_get_codec_passthrough_name
