@@ -41,6 +41,30 @@
 
 #define BUF_SIZE 128
 
+char * libamg_comcerto_get_vad_enable(void)
+{
+	int vad_enable = 0;
+	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();
+
+	vad_enable = config->vad_enable;
+	free(config);
+
+	return vad_enable;
+}
+
+char * libamg_comcerto_get_codec_g723_1_bitrate_name(void)
+{
+	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();
+
+	if (config->codec_g723_1){
+		free(config);
+		return G723_1_BITRATE_63_NAME;
+	}
+
+	free(config);
+	return G723_1_BITRATE_53_NAME;
+}
+
 int libamg_comcerto_get_codec_passthrough_code(const char *codec_name)
 {
 	if (!strcmp(codec_name, CODEC_G711_A_NAME))

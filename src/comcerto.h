@@ -86,6 +86,8 @@
 #define FILE_COMCERTO_CONF				FILE_COMCERTO_CONF_PATH FILE_COMCERTO_CONF_NAME
 #define FILE_CONCERTO_CONF_DEFAULT_PATH	"/etc.ro/asterisk/"
 
+#define G723_1_BITRATE_63_NAME "6.3"
+#define G723_1_BITRATE_53_NAME "5.3"
 
 /*
  * General Structures
@@ -136,6 +138,24 @@ struct libamg_comcerto_config {
 /*
  * Functions Declaration
  */
+
+/**
+ * libamg_comcerto_get_vad_enable
+ *
+ * Get VAD enable
+ *
+ * @return 1 if enabled, 0 if disabled
+ */
+char * libamg_comcerto_get_vad_enable(void);
+
+/**
+ * libamg_comcerto_get_codec_passthrough_name
+ *
+ * Get SIP codec g723_1 bitrate name
+ *
+ * @return string
+ */
+char * libamg_comcerto_get_codec_g723_1_bitrate_name(void);
 
 /**
  * libamg_comcerto_get_codec_passthrough_code
