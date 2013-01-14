@@ -77,7 +77,7 @@
 #define CODEC_G726_16Kbps_COD		0x20
 #define CODEC_G726_24Kbps_NAME 		"g726-24"
 #define CODEC_G726_24Kbps_COD		0x10
-#define CODEC_G726_32Kbps_NAME 		"g726-32"
+#define CODEC_G726_32Kbps_NAME 		"g726"
 #define CODEC_G726_32Kbps_COD		0x8
 #define CODEC_G726_40Kbps_NAME 		"g726-40"
 #define CODEC_G726_40Kbps_COD		0x4
