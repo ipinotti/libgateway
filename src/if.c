@@ -378,7 +378,7 @@ int libamg_arp_get_hwaddr(struct in_addr *ipaddr, char *hwaddr)
 	}
 
 	while (fgets(line, sizeof(line), file) != NULL) {
-		if (strstr(line, ipaddr_str)){
+		if (strstr(line, ipaddr_str) && line[strlen(ipaddr_str)] == ' ') {
 			if (sscanf(line, "%*s %*s %*s %s", hwaddr_str) < 1){
 				fclose(file);
 				return -1;
