@@ -300,11 +300,15 @@ int libamg_dsp_set_dtmf_mode(int conn_id, SVoIPChnlParams *parms, enum _dtmf_mod
 	case DTMF_MODE_NONE:
 		break;
 	case DTMF_MODE_INBAND:
+		amg_dbg("(Channel %d) Enabling Inband DTMF mode\n", conn_id);
 		opt->param_4.bits.dtmf_voice = VOIP_DTMFOPT_DTMF_VOICE_ENABLE;
 		break;
 	case DTMF_MODE_RFC2833:
 	default:
+		amg_dbg("(Channel %d) Enabling RFC2833 DTMF mode\n", conn_id);
 		opt->param_4.bits.dtmf_rtp = VOIP_DTMFOPT_DTMF_RTP_ENABLE;
+		opt->param_4.bits.regeneration = VOIP_DTMFOPT_REGENERATION_ENABLE; /* Generate events to TDM */
+		opt->param_4.bits.redundancy = VOIP_DTMFOPT_REDUNDANCY_AAL2; /* RFC4733 redundancy scheme */
 		break;
 	}
 
