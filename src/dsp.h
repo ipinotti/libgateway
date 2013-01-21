@@ -52,7 +52,7 @@ int libamg_dsp_set_rtp_interval(int conn_id, SVoIPChnlParams *parms, int interva
  * @param conn_id: Connection in question
  * @param parms: Pointer to channel parameters
  * @param enable: 1 to enable, 0 to disable
- * @param tune: Value from 0 (more bandwidth saving ) to 4 (more quality)
+ * @param tune: SNR value for considering as voice in dB - 0, 5, 10, 20, 30
  * @return 0 if success, negative if error
  */
 int libamg_dsp_set_vad(int conn_id, SVoIPChnlParams *parms, int enable, int tune);

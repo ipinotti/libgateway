@@ -225,16 +225,39 @@ int libamg_dsp_set_rtp_interval(int conn_id, SVoIPChnlParams *parms, int interva
 int libamg_dsp_set_vad(int conn_id, SVoIPChnlParams *parms, int enable, int tune)
 {
 	struct _VOIP_VCEOPT *opt = &parms->stVoiceOpt;
+	int vad_tune = -1;
 
-	if (tune < 0 || tune > 4)
+	switch (tune) {
+	case 0:
+	default:
+		vad_tune = 0;
+		break;
+	case 5:
+		vad_tune = 1;
+		break;
+	case 10:
+		vad_tune = 2;
+		break;
+	case 20:
+		vad_tune = 3;
+		break;
+	case 30:
+		vad_tune = 4;
+		break;
+	}
+
+	if (vad_tune < 0 || vad_tune > 4)
 		return -1;
 
-	if (enable)
+	if (enable) {
 		opt->param_4.bits.vadtype = VOIP_VCEOPT_VADTYPE_ENABLE;
-	else
+		amg_dbg("(Channel %d) VAD Enabled: voice active with SNR %ddB\n", conn_id, tune);
+	} else {
 		opt->param_4.bits.vadtype = VOIP_VCEOPT_VADTYPE_DISABLE;
+		amg_dbg("(Channel %d) VAD Disabled\n", conn_id);
+	}
 
-	opt->vad_tune = tune; /* 0 - 4 */
+	opt->vad_tune = vad_tune; /* 0 - 4 */
 
 	return _write_vceopt(conn_id, opt);
 }
