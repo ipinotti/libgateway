@@ -40,6 +40,66 @@
 
 #define BUF_SIZE	256
 
+static int __get_codecs_intvl_array(int *codecs_intvl_array)
+{
+	int pos_codec = 0;
+
+	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();
+
+	codecs_intvl_array[pos_codec] = CODEC_G711_A_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g711_a;
+	codecs_intvl_array[++pos_codec] = CODEC_G711_U_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g711_u;
+	codecs_intvl_array[++pos_codec] = CODEC_G723_1_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g723_1;
+	codecs_intvl_array[++pos_codec] = CODEC_G726_16Kbps_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g726_16;
+	codecs_intvl_array[++pos_codec] = CODEC_G726_24Kbps_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g726_24;
+	codecs_intvl_array[++pos_codec] = CODEC_G726_32Kbps_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g726_32;
+	codecs_intvl_array[++pos_codec] = CODEC_G726_40Kbps_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g726_40;
+	codecs_intvl_array[++pos_codec] = CODEC_G729_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.g729;
+	codecs_intvl_array[++pos_codec] = CODEC_GSM_COD;
+	codecs_intvl_array[++pos_codec] = config->codecs_intvl.gsm;
+
+	free(config);
+
+	return 0;
+}
+
+int libamg_sip_get_min_codec_intvl(void)
+{
+	int i, j = 0;
+	int min_codec_intvl = 0;
+	int codec_intvl_array[NUM_AVAILABLE_CODECS * 2];
+
+	struct libamg_sip_config *sip_config = libamg_sip_parse_config();
+
+	__get_codecs_intvl_array(codec_intvl_array);
+
+	for (i = 0; i < NUM_AVAILABLE_CODECS; ++i) {
+		if (sip_config->accounts[0].allow[i] == 0)
+			continue;
+
+		for (j = 0; j < sizeof(codec_intvl_array); j+=2) {
+			if (sip_config->accounts[0].allow[i] == codec_intvl_array[j]){
+				if (min_codec_intvl == 0)
+					min_codec_intvl = codec_intvl_array[j+1];
+				else
+					if (min_codec_intvl > codec_intvl_array[j+1])
+						min_codec_intvl = codec_intvl_array[j+1];
+			}
+		}
+	}
+
+	free(sip_config);
+
+	return min_codec_intvl;
+}
+
 int libamg_sip_reset_config(void)
 {
 	char command[BUF_SIZE];

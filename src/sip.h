@@ -175,6 +175,15 @@ struct libamg_sip_config {
  */
 
 /**
+ * libamg_sip_get_min_codec_intvl
+ *
+ * Get Minimum Codec RTP Interval
+ *
+ * @return int value of min codec intvl, negative if error
+ */
+int libamg_sip_get_min_codec_intvl(void);
+
+/**
  * libamg_sip_reset_config
  *
  * Restore the SIP configures from default sip configuration file
