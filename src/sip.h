@@ -48,6 +48,8 @@
 
 #define SIP_GENERAL_CONTENT	"[general]\n" \
 							"context=from-sip\n" \
+							"sdpsession=SIP Call\n" \
+							"sdpowner=ParksSIP-MG\n" \
 							"disallow=all\n" \
 							"srvlookup=yes\n" \
 							"bindaddr=0.0.0.0\n" \
