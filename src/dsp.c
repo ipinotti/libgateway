@@ -774,7 +774,9 @@ static int __get_channel_stats(int conn_id, struct _VOIP_VCEINFO *voice_stat, in
 	void *message;
 	U32 response_len = 512;
 	U8 device_response[512];
+#ifdef DEBUG_STAT
 	int i;
+#endif
 
 	/* allocate a message to query the current options */
 	message = VAPI_AllocateMessage(512);
