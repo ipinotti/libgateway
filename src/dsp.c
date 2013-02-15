@@ -195,6 +195,11 @@ static int _write_mfdpar(int conn_id, struct _VOIP_MFDPAR *opt)
 	return _write_opts(conn_id, FC_VOIP_MFDPAR, (void *)opt, sizeof(struct _VOIP_MFDPAR));
 }
 
+static int _write_mftune(int conn_id, struct _VOIP_MFTUNE *opt)
+{
+	return _write_opts(conn_id, FC_VOIP_MFTUNE, (void *)opt, sizeof(struct _VOIP_MFTUNE));
+}
+
 static int _write_ptset(int conn_id, struct _VOIP_PTSET *opt)
 {
 	return _write_opts(conn_id, FC_VOIP_PTSET, (void *)opt, sizeof(struct _VOIP_PTSET));
@@ -437,22 +442,31 @@ int libamg_dsp_dequeue_tone_event(int conn_id)
 
 int libamg_dsp_set_mf_r2_timings(int conn_id)
 {
-	struct _VOIP_MFDPAR opt;
+	struct _VOIP_MFDPAR par_opt;
+	struct _VOIP_MFTUNE tune_opt;
 
-	opt.mf_selector = 1; /* R2 */
+	par_opt.mf_selector = 1; /* R2 */
 
-	/*
-	 * FIXME Review these values
-	 * Lab tests showed these values to be robust,
-	 * but slow. Maybe we can lower this?
-	 */
+	par_opt.minimum_off_time = 200;
+	par_opt.minimum_on_time = 200;
+	par_opt.maximum_dropout_time = 80;
 
-	opt.minimum_off_time = 200;
-	opt.minimum_on_time = 200;
-	opt.maximum_dropout_time = 100;
-
-	if (_write_mfdpar(conn_id, &opt) < 0)
+	if (_write_mfdpar(conn_id, &par_opt) < 0)
 		return -1;
+
+
+	tune_opt.frequency_deviation = 12;
+	tune_opt.negative_twist = 100;
+	tune_opt.positive_twist = 100;
+	tune_opt.snr_threshold = 0;
+	tune_opt.minimum_level_threshold = 350;
+	tune_opt.param_9.word = 2;
+	tune_opt.mf_selector = 1;
+
+	if (_write_mftune(conn_id, &tune_opt))
+		return -1;
+
+	amg_dbg("(Channel %d) Successfully set MF R2 Timings\n", conn_id);
 
 	return 0;
 }
@@ -491,6 +505,13 @@ int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
 		amg_err("Error sending SIGDET for connection %d\n", conn_id);
 		return -1;
 	}
+
+#if 0 /* Doesn't seem to help TONEDET events */
+	if (libamg_dsp_set_mf_r2_timings(conn_id) < 0) {
+		amg_err("Error sending MFPAR/MFTUNE for connection %d\n", conn_id);
+		return -1;
+	}
+#endif
 
 	if (mode == INBAND_SIG_OFF)
 		conn_state = eTdmActive;
