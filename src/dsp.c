@@ -498,8 +498,6 @@ int libamg_dsp_set_inband_signaling(int conn_id, enum inband_signaling_t mode)
 		conn_state = eInbandToneDetActive;
 	}
 
-	amg_dbg("Setting connection state to %s\n",
-			conn_state == eInbandToneDetActive ? "Inband detection" : "TDM active");
 	if (VAPI_SetConnectionState(conn_id, conn_state, NULL) < 0) {
 		amg_err("(Channel %d): Error setting connection state to %s mode\n",
 				conn_id, conn_state == eInbandToneDetActive ?
