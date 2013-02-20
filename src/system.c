@@ -186,3 +186,43 @@ char *libamg_system_get_cpu_info(void)
 
 	return cpu_info;
 }
+
+int libamg_system_get_serialnum(char *data, int maxlen)
+{
+	char buffer[4096];
+	char *p, *q;
+	int i, fd, n, ret = -1;
+
+	memset(data, 0, maxlen);
+
+	fd = open(FILE_SYSTEM_SERIAL_NUM, O_RDONLY);
+	if (fd < 0) {
+		libamg_log_error("Error opening serialnum info file.\n");
+		return -1;
+	}
+
+	n = read(fd, buffer, sizeof(buffer));
+	if (n <= 0)
+		return -1;
+
+	/* Find start of serial number string */
+	p = strstr(buffer, "serialnum=");
+	if (p == NULL)
+		return -1;
+
+	p += strlen("serialnum=");
+
+	/* End the string when a space is found */
+	q = p;
+	while(*q != 0) {
+		if (*q == ' ') {
+			*q = 0;
+			break;
+		}
+		q++;
+	}
+
+	strncpy(data, p, maxlen);
+
+	return 0;
+}

@@ -34,6 +34,7 @@
 #define FILE_SYSTEM_MEMORY		"/proc/meminfo"
 #define FILE_SYSTEM_CPU_USAGE 	"/proc/stat"
 #define FILE_SYSTEM_CPU_INFO	"/proc/cpuinfo"
+#define FILE_SYSTEM_SERIAL_NUM	"/proc/cmdline"
 
 /*
  * Functions Declaration
@@ -83,5 +84,17 @@ char *libamg_system_get_cpu_usage(void);
  * @return string
  */
 char *libamg_system_get_cpu_info(void);
+
+/**
+ * libamg_system_get_serialnum
+ *
+ * Get board serial number stored in bootloader environment
+ *
+ * @data Buffer to store the serial number
+ * @maxlen Buffer length
+ *
+ * @return 0 if success, -1 if error
+ */
+int libamg_system_get_serialnum(char *data, int maxlen);
 
 #endif /* SYSTEM_H_ */
