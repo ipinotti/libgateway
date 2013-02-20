@@ -34,7 +34,7 @@
 #define FILE_SYSTEM_MEMORY		"/proc/meminfo"
 #define FILE_SYSTEM_CPU_USAGE 	"/proc/stat"
 #define FILE_SYSTEM_CPU_INFO	"/proc/cpuinfo"
-#define FILE_SYSTEM_SERIAL_NUM	"/proc/cmdline"
+#define FILE_SYSTEM_SERIAL_NUM	"/dev/mtd1"
 
 /*
  * Functions Declaration

@@ -191,7 +191,7 @@ int libamg_system_get_serialnum(char *data, int maxlen)
 {
 	char buffer[4096];
 	char *p, *q;
-	int fd, n;
+	int i, fd, n, ret = -1;
 
 	memset(data, 0, maxlen);
 
@@ -201,28 +201,40 @@ int libamg_system_get_serialnum(char *data, int maxlen)
 		return -1;
 	}
 
-	n = read(fd, buffer, sizeof(buffer));
-	if (n <= 0)
-		return -1;
 
-	/* Find start of serial number string */
-	p = strstr(buffer, "serialnum=");
-	if (p == NULL)
-		return -1;
-
-	p += strlen("serialnum=");
-
-	/* End the string when a space is found */
-	q = p;
-	while(*q != 0) {
-		if (*q == ' ') {
-			*q = 0;
+	while (1) {
+		n = read(fd, buffer, sizeof(buffer));
+		if (n <= 0)
 			break;
+
+		/* Makes things a little bit easier by
+		 * replacing '\0' with '\n' */
+		for (i = 0; i < sizeof(buffer); i++) {
+			if (buffer[i] == 0)
+				buffer[i] = '\n';
 		}
-		q++;
+
+		/* Search for the string we want ... */
+		p = strstr(buffer, "serialnum=");
+		if (p == NULL)
+			return -1;
+
+		/* Ok, found it. Now offset to get the pure data */
+		p += strlen("serialnum=");
+
+		/* Now remove the '\n' with the '\0' so the string
+		 * is correctly ended. */
+		q = p;
+		while (*q != '\n')
+			q++;
+		*q = 0;
+
+		/* Good to go now, copy to exit buffer */
+		strncpy(data, p, maxlen);
+
+		ret = 0;
+		break;
 	}
 
-	strncpy(data, p, maxlen);
-
-	return 0;
+	return ret;
 }
