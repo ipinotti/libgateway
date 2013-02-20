@@ -191,7 +191,7 @@ int libamg_system_get_serialnum(char *data, int maxlen)
 {
 	char buffer[4096];
 	char *p, *q;
-	int i, fd, n, ret = -1;
+	int fd, n;
 
 	memset(data, 0, maxlen);
 
