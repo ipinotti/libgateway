@@ -118,6 +118,26 @@ int libamg_comcerto_rtp_reload(void)
 	return system("asterisk -rx \"module reload librtp-comcerto\"");
 }
 
+int libamg_comcerto_set_debugging(void)
+{
+	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();
+
+	/* If any debug is enabled, raise verbose level */
+	if (config->debug)
+		system("/sbin/asterisk -rx 'core set verbose 99'");
+
+	if (config->debug & DEBUG_SIP)
+		system("/sbin/asterisk -rx 'sip set debug on'");
+	if (config->debug & DEBUG_MFCR2)
+		system("/sbin/asterisk -rx 'mfcr2 set debug all'");
+	if (config->debug & DEBUG_ISDN)
+		system("/sbin/asterisk -rx 'pri set debug on span 1'");
+	if (config->debug & DEBUG_DTMF)
+		system("/sbin/asterisk -rx 'core set debug 99'");
+
+	return 0;
+}
+
 struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 {
 	FILE *file;
@@ -192,6 +212,10 @@ struct libamg_comcerto_config *libamg_comcerto_parse_config(void)
 			conf->jb_conf.jb_maxdelay = atoi(value);
 		} else if (!strcmp(key, "jbdelet_thrld")) {
 			conf->jb_conf.jb_delet_thrld = atoi(value);
+		} else if (!strcmp(key, "mfcr2_tone_amp")) {
+			conf->mfcr2_tone_amp = atoi(value);
+		} else if (!strcmp(key, "debug")) {
+			conf->debug = atoi(value);
 		}
 				/* CODECS INTERVAL*/
 		else if (!strcmp(key, "codec_intvl_g711_a")) {
@@ -237,6 +261,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "[general]\n");
 
 	/* Save Comcerto conf. parameters */
+	fprintf(file, "debug=%d\n", conf->debug);
 	fprintf(file, "ais_enable=%s\n", conf->ais_enable ? "yes" : "no");
 	fprintf(file, "vad_enable=%s\n", conf->vad_enable ? "yes" : "no");
 	fprintf(file, "vad_level=%hd\n", conf->vad_level);
@@ -245,6 +270,7 @@ int libamg_comcerto_save_config(struct libamg_comcerto_config *conf)
 	fprintf(file, "ectail=%hd\n", conf->ectail);
 	fprintf(file, "e1_enable=%s\n", conf->e1_enable ? "yes" : "no");
 	fprintf(file, "e1_loopback_enable=%s\n", conf->e1_loopback_enable ? "yes" : "no");
+	fprintf(file, "mfcr2_tone_amp=%d\n", conf->mfcr2_tone_amp);
 	/* Jitter Buffer configs */
 	fprintf(file, "jbenable=%s\n", "yes"); /* ALWAYS ON FOR COMCERTO*/
 	fprintf(file, "jbmaxsize=%hd\n", conf->jb_conf.jb_maxsize);

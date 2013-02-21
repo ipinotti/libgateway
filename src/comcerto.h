@@ -89,6 +89,11 @@
 #define G723_1_BITRATE_63_NAME "6.3"
 #define G723_1_BITRATE_53_NAME "5.3"
 
+#define DEBUG_SIP 	0x1
+#define DEBUG_MFCR2	0x2
+#define DEBUG_ISDN	0x4
+#define DEBUG_DTMF	0x8
+
 /*
  * General Structures
  */
@@ -118,6 +123,7 @@ typedef struct libamg_jb_config {
 } libamg_jb_config;
 
 struct libamg_comcerto_config {
+	int debug; /* General debug -- maybe find another place to put this */
 	int codec_g723_1;
 	int pass_through;
 	int ais_enable;
@@ -130,6 +136,7 @@ struct libamg_comcerto_config {
 	int rxgain;
 	int e1_enable;
 	int e1_loopback_enable;
+	int mfcr2_tone_amp;
 	libamg_jb_config jb_conf;
 	libamg_codecs_intvl codecs_intvl;
 };
@@ -204,6 +211,18 @@ int libamg_comcerto_reset_config(void);
  * @return 0 if success, negative if error
  */
 int libamg_comcerto_rtp_reload(void);
+
+
+/**
+ * libamg_comcerto_set_debugging
+ *
+ * Configure Asterisk debugging according to debug line
+ * in comcerto.conf
+ *
+ * @return 0 if success, negative if error
+ */
+int libamg_comcerto_set_debugging(void);
+
 
 /**
  * libamg_comcerto_parse_config

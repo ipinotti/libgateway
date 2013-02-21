@@ -522,6 +522,8 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 	if (conf->session_refresher)
 		fprintf(file, "session-refresher=%s\n", conf->session_refresher);
 
+	fprintf(file, "autoframing=%s\n", conf->autoframing ? "yes" : "no");
+
 	/* Save SIP account registration */
 	libamg_str_striplf(conf->register_username);
 	fprintf(file, ";reg_username=%s\n", conf->register_username);
