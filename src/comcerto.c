@@ -103,6 +103,51 @@ char * libamg_comcerto_get_codec_passthrough_name(int codec_code)
 	return 0;
 }
 
+int libamg_comcerto_get_codec_packetization_interval(int codec_code)
+{
+	struct libamg_comcerto_config *config = libamg_comcerto_parse_config();
+	int interval = 20;
+
+	if (config == NULL)
+		return interval;
+
+	switch (codec_code) {
+		case CODEC_G711_A_COD:
+			interval = config->codecs_intvl.g711_a;
+			break;
+		case CODEC_G711_U_COD:
+			interval = config->codecs_intvl.g711_u;
+			break;
+		case CODEC_G723_1_COD:
+			interval = config->codecs_intvl.g723_1;
+			break;
+		case CODEC_G726_16Kbps_COD:
+			interval = config->codecs_intvl.g726_16;
+			break;
+		case CODEC_G726_24Kbps_COD:
+			interval = config->codecs_intvl.g726_24;
+			break;
+		case CODEC_G726_32Kbps_COD:
+			interval = config->codecs_intvl.g726_32;
+			break;
+		case CODEC_G726_40Kbps_COD:
+			interval = config->codecs_intvl.g726_40;
+			break;
+		case CODEC_G729_COD:
+			interval = config->codecs_intvl.g729;
+			break;
+		case CODEC_GSM_COD:
+			interval = config->codecs_intvl.gsm;
+			break;
+		default:
+			break;
+	}
+
+	free(config);
+
+	return interval;
+}
+
 int libamg_comcerto_reset_config(void)
 {
 	char command[BUF_SIZE];

@@ -194,6 +194,16 @@ int libamg_comcerto_get_codec_passthrough_code(const char *codec_name);
 char * libamg_comcerto_get_codec_passthrough_name(int codec_code);
 
 /**
+ * libamg_comcerto_get_codec_packetization_interval
+ *
+ * Get packetization interval for a certain codec
+ *
+ * @param codec_code
+ * @return interval
+ */
+int libamg_comcerto_get_codec_packetization_interval(int codec_code);
+
+/**
  * libamg_comcerto_rtp_reset_config
  *
  * Restore the TDM configures from default comcerto configuration file
