@@ -89,6 +89,8 @@
 #define CODEC_GSM_COD				0x1
 
 /* DTMF Modes*/
+#define DTMF_MODE_AUTO_NAME			"auto"
+#define DTMF_MODE_AUTO_COD			0x8
 #define DTMF_MODE_IN_BAND_NAME		"inband"
 #define DTMF_MODE_IN_BAND_COD		0x4
 #define DTMF_MODE_RFC2833_NAME		"rfc2833"

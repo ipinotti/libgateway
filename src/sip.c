@@ -247,6 +247,8 @@ int libamg_sip_get_dtmfmode_code(const char *dtmfmode_name)
 		return DTMF_MODE_RFC2833_COD;
 	else if (!strcmp(dtmfmode_name, DTMF_MODE_SIP_INFO_NAME))
 		return DTMF_MODE_SIP_INFO_COD;
+	else if (!strcmp(dtmfmode_name, DTMF_MODE_AUTO_NAME))
+		return DTMF_MODE_AUTO_COD;
 	else
 		return -1;
 }
@@ -262,6 +264,9 @@ char * libamg_sip_get_dtmfmode_name(int dtmfmode_code)
 			break;
 		case DTMF_MODE_SIP_INFO_COD:
 			return DTMF_MODE_SIP_INFO_NAME;
+			break;
+		case DTMF_MODE_AUTO_COD:
+			return DTMF_MODE_AUTO_NAME;
 			break;
 		default:
 			return NULL;
