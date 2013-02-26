@@ -37,6 +37,7 @@
 #include "sip.h"
 #include "log.h"
 #include "str.h"
+#include "comcerto.h"
 
 #define BUF_SIZE	256
 
@@ -272,23 +273,23 @@ char * libamg_sip_get_dtmfmode_name(int dtmfmode_code)
 
 int libamg_sip_get_codec_code(const char *codec_name)
 {
-	if (!strcmp(codec_name, CODEC_G711_A_NAME))
+	if (!strncmp(codec_name, CODEC_G711_A_NAME, strlen(CODEC_G711_A_NAME)))
 		return CODEC_G711_A_COD;
-	else if (!strcmp(codec_name, CODEC_G711_U_NAME))
+	else if (!strncmp(codec_name, CODEC_G711_U_NAME, strlen(CODEC_G711_U_NAME)))
 		return CODEC_G711_U_COD;
-	else if (!strcmp(codec_name, CODEC_G723_1_NAME))
+	else if (!strncmp(codec_name, CODEC_G723_1_NAME, strlen(CODEC_G723_1_NAME)))
 		return CODEC_G723_1_COD;
-	else if (!strcmp(codec_name, CODEC_G726_16Kbps_NAME))
+	else if (!strncmp(codec_name, CODEC_G726_16Kbps_NAME, strlen(CODEC_G726_16Kbps_NAME)))
 		return CODEC_G726_16Kbps_COD;
-	else if (!strcmp(codec_name, CODEC_G726_24Kbps_NAME))
+	else if (!strncmp(codec_name, CODEC_G726_24Kbps_NAME, strlen(CODEC_G726_24Kbps_NAME)))
 		return CODEC_G726_24Kbps_COD;
-	else if (!strcmp(codec_name, CODEC_G726_32Kbps_NAME))
-		return CODEC_G726_32Kbps_COD;
-	else if (!strcmp(codec_name, CODEC_G726_40Kbps_NAME))
+	else if (!strncmp(codec_name, CODEC_G726_40Kbps_NAME, strlen(CODEC_G726_40Kbps_NAME)))
 		return CODEC_G726_40Kbps_COD;
-	else if (!strcmp(codec_name, CODEC_G729_NAME))
+	else if (!strncmp(codec_name, CODEC_G726_32Kbps_NAME, strlen(CODEC_G726_32Kbps_NAME)))
+		return CODEC_G726_32Kbps_COD;
+	else if (!strncmp(codec_name, CODEC_G729_NAME, strlen(CODEC_G729_NAME)))
 		return CODEC_G729_COD;
-	else if (!strcmp(codec_name, CODEC_GSM_NAME))
+	else if (!strncmp(codec_name, CODEC_GSM_NAME, strlen(CODEC_GSM_NAME)))
 		return CODEC_GSM_COD;
 	else
 		return -1;
@@ -576,7 +577,9 @@ int libamg_sip_save_config(struct libamg_sip_config *conf)
 		if (account->allow[pos_codec] <= 0)
 			continue;
 
-		fprintf(file, "allow=%s\n", libamg_sip_get_codec_name(account->allow[pos_codec]));
+		fprintf(file, "allow=%s:%d\n",
+				libamg_sip_get_codec_name(account->allow[pos_codec]),
+				libamg_comcerto_get_codec_packetization_interval(account->allow[pos_codec]));
 	}
 
 	fclose(file);
